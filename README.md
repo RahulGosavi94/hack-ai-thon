@@ -946,6 +946,8 @@ Confused about a feature? Check the [Documentation Index](DOCUMENTATION_INDEX.md
 
 - 🌐 [Live Application](#running-the-application)
 - 📖 [Full Documentation](DOCUMENTATION_INDEX.md)
+- 📸 [Complete UI Screenshots](SCREENSHOTS_COMPLETE_GUIDE.md) - 8 fully loaded screenshots with real data
+- 🎯 [GitHub Issues Summary](GITHUB_ISSUES_SUMMARY.md) - Resolved issues and implementation details
 - 🐛 [Issue Tracker](https://github.com/RahulGosavi94/hack-ai-thon/issues)
 - 💬 [Discussions](https://github.com/RahulGosavi94/hack-ai-thon/discussions)
 - ⭐ [Star this Repository](https://github.com/RahulGosavi94/hack-ai-thon)
