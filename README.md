@@ -299,6 +299,9 @@ The **Disruption Management & Passenger Care System** is an intelligent platform
 └──────┘  └─────────┘  └────────┘
 ```
 
+<img width="1338" height="622" alt="image" src="https://github.com/user-attachments/assets/e0a72eae-d6b7-4cf0-b64b-b06615838956" />
+
+
 ### Core Components
 
 #### **Backend (Flask)**
