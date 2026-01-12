@@ -1,0 +1,273 @@
+================================================================================
+                    OLLAMA INTEGRATION DATA FLOW
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        USER INTERFACE (Browser)                             │
+│                                                                             │
+│  Flight Details Page (localhost:8000/index.html)                           │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ Flight: EY129 ⚠️ DELAYED (60 min)                                   │   │
+│  │ Route: DEL → AUH                                                    │   │
+│  │ Passengers: 300                                                     │   │
+│  │                                                                      │   │
+│  │ [🔄 Rebook] [🏨 Hotel] [💰 Compensation] [📧 Message]             │   │
+│  │                                                                      │   │
+│  │ ┌──────────────────────────────────────────────────────────────┐   │   │
+│  │ │ 🤖 Generate AI Suggestions ← USER CLICKS HERE              │   │   │
+│  │ └──────────────────────────────────────────────────────────────┘   │   │
+│  │                                                                      │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    ↓                                        │
+└────────────────────────────────────┼────────────────────────────────────────┘
+                                     │
+                    generateRecommendations() [Line 498]
+                                     │
+                                     ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    JAVASCRIPT (Frontend Processing)                         │
+│                                                                             │
+│  async function generateRecommendations() {                                 │
+│    fetch(API_BASE + '/api/recommendations/generate', {                      │
+│      method: 'POST',                                                        │
+│      body: { flight_id: 'FLIGHT_EY129' }                                    │
+│    })                                                                       │
+│  }                                                                          │
+│                                                                             │
+│  ↓ Sends HTTP Request                                                      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                     │
+                    HTTP POST Request: localhost:5000
+                                     │
+                                     ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        FLASK BACKEND (app.py)                              │
+│                                                                             │
+│  @app.route('/api/recommendations/generate', methods=['POST'])  [Line 238]  │
+│  def generate_recommendations():                                            │
+│      flight_id = request.get_json().get('flight_id')                        │
+│      recommendations_data = load_json_file("recommendations.json")          │
+│      return jsonify(recommendations_data)                                   │
+│                                                                             │
+│  ↓ Returns JSON Response                                                   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                     │
+                    JSON Response with AI Suggestions
+                                     │
+                                     ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    JAVASCRIPT (Frontend Display)                            │
+│                                                                             │
+│  fetchRecommendation(disruptionId) [Line 524]                              │
+│  renderRecommendationsModal(data)  [Line 1111]                             │
+│                                                                             │
+│  ↓ Renders Bootstrap Modal                                                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                     │
+                                     ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         RECOMMENDATIONS MODAL                               │
+│                                                                             │
+│  ╔═══════════════════════════════════════════════════════════════════════╗ │
+│  ║          ✈️ AI RECOMMENDATIONS FOR DISRUPTION                         ║ │
+│  ╠═══════════════════════════════════════════════════════════════════════╣ │
+│  ║                                                                       ║ │
+│  ║ 📢 INITIAL COMMUNICATIONS                                            ║ │
+│  ║   • Email: "Your flight EY129 has been delayed..."                  ║ │
+│  ║   • SMS: "Flight update: Delay 60 min"                              ║ │
+│  ║   • App: Push notification sent                                     ║ │
+│  ║                                                                       ║ │
+│  ║ ✈️ REBOOKING OPTIONS                                                 ║ │
+│  ║   • EY130 - Depart 23:00, Arrive 07:00 (100 seats)                  ║ │
+│  ║   • EY131 - Depart 02:30, Arrive 10:30 (85 seats)                   ║ │
+│  ║                                                                       ║ │
+│  ║ 🍽️ VOUCHERS                                                          ║ │
+│  ║   • Meals: $25 per passenger (300 = $7,500)                         ║ │
+│  ║   • Hotel: $150 per passenger (300 = $45,000)                       ║ │
+│  ║   • Transport: $50 per passenger (300 = $15,000)                    ║ │
+│  ║                                                                       ║ │
+│  ║ 💰 COMPENSATION                                                       ║ │
+│  ║   • €125 per passenger (300 = €37,500)                              ║ │
+│  ║   • EU261 Compliance: Yes                                           ║ │
+│  ║                                                                       ║ │
+│  ║ 🔧 OPERATIONAL ACTIONS                                               ║ │
+│  ║   • Assign ground staff to assist passengers                        ║ │
+│  ║   • Arrange ground transportation                                   ║ │
+│  ║   • Coordinate with catering team                                   ║ │
+│  ║                                                                       ║ │
+│  ║ 💡 COST OPTIMIZATION                                                 ║ │
+│  ║   • Use partner airlines: Save $5,000                               ║ │
+│  ║   • Dynamic voucher allocation: Save $3,500                         ║ │
+│  ║                                                                       ║ │
+│  ║ [ ✓ Apply All ]  [ Customize ]  [ ✕ Close ]                         ║ │
+│  ╚═══════════════════════════════════════════════════════════════════════╝ │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+                          WHERE OLLAMA IS INVOLVED
+================================================================================
+
+The recommendations shown above were GENERATED BY OLLAMA and stored in:
+    📁 test_data/recommendations.json
+
+GENERATION PROCESS (Pre-computed):
+═════════════════════════════════════════════════════════════════════════════
+
+  1. System Start
+         ↓
+  2. recommendation_engine.py is executed
+         ↓
+  3. For each disruption:
+     - Extract disruption data
+     - Create JSON schema prompt
+     - Send to Ollama: http://localhost:11434/api/generate
+     - Model: llama2 (Temperature: 0.0)
+     - Ollama processes: ~5-30 seconds
+     - Parse JSON response
+     - Fallback to rule-based if needed
+         ↓
+  4. Save to recommendations.json
+         ↓
+  5. Frontend loads pre-computed recommendations
+         ↓
+  6. Display in modal
+
+
+OLLAMA LLM PROCESSING DETAILS:
+═════════════════════════════════════════════════════════════════════════════
+
+Input Prompt (sent to Ollama):
+─────────────────────────────────
+"You are an airline disruption management assistant. Generate ONLY valid JSON 
+output based on this disruption.
+
+Use this schema:
+{
+    "disruption_id": "string",
+    "flight_number": "string",
+    "rebooking_options": [...],
+    "vouchers": [...],
+    "compensation": [...],
+    ...
+}
+
+Disruption Data:
+{
+    "disruption_id": "DISR_001",
+    "flight_number": "EY129",
+    "delay_minutes": 60,
+    "affected_passengers": 300,
+    "disruption_status": "Delayed",
+    "disruption_reason": "Technical issue",
+    "origin": "DEL",
+    "destination": "AUH"
+}"
+
+
+Ollama Processing:
+─────────────────
+  Model: llama2 (7B parameters)
+  Endpoint: http://localhost:11434/api/generate
+  Temperature: 0.0 (deterministic)
+  Time: ~5-30 seconds
+  Stream: False (full response at once)
+
+
+Ollama Response (JSON):
+──────────────────────
+{
+    "disruption_id": "DISR_001",
+    "flight_number": "EY129",
+    "flight_date": "2025-11-27",
+    "rebooking_options": [
+        {
+            "flight_number": "EY130",
+            "new_departure_time": "2025-11-27T23:00:00",
+            "new_arrival_time": "2025-11-28T07:00:00",
+            "passenger_count": 100
+        }
+    ],
+    "vouchers": [
+        {"type": "meal", "amount": 50, "currency": "USD", "quantity": 300}
+    ],
+    "compensation": [
+        {"type": "monetary", "amount": 125, "currency": "EUR", "passenger_count": 300}
+    ],
+    "communications": [
+        {
+            "channel": "email",
+            "recipient_group": "all_affected",
+            "message_template": "Your flight EY129 has been delayed..."
+        }
+    ],
+    ...
+}
+
+
+================================================================================
+                        ACTIVE SYSTEM COMPONENTS
+================================================================================
+
+✅ OLLAMA SERVICE
+   Location: http://localhost:11434
+   Status: RUNNING
+   Models: llama2 (3.8GB), gpt-oss:20b (13.8GB)
+   Used for: Generating AI recommendations
+
+✅ FLASK BACKEND
+   Location: http://localhost:5000
+   Status: RUNNING
+   Port: 5000
+   Used for: Serving API endpoints
+
+✅ FRONTEND SERVER
+   Location: http://localhost:8000
+   Status: RUNNING
+   Port: 8000
+   File: index.html
+
+✅ RECOMMENDATION ENGINE
+   File: recommendation_engine.py
+   Purpose: Bridge between disruptions and Ollama LLM
+   Status: READY TO USE
+
+✅ DATA FILES
+   recommendations.json: Pre-computed AI suggestions (Ollama-generated)
+   detected_disruptions.json: 3 disruptions (EY129, EY245, EY567)
+   passengers_data.json: 900 passengers with details
+   flights_data.json: Flight information
+
+
+================================================================================
+                          QUICK TEST COMMANDS
+================================================================================
+
+1. Verify Ollama Running:
+   $ curl http://localhost:11434/api/tags
+   
+   Output should show: llama2 and gpt-oss:20b models
+
+2. Check Generated Recommendations:
+   $ cat test_data/recommendations.json | jq '.recommendations[0]'
+   
+   Output shows AI-generated suggestion structure
+
+3. Trigger Generation (UI):
+   - Open: http://localhost:8000/index.html
+   - Click RED flight (disrupted): EY129
+   - Click "🤖 Generate AI Suggestions"
+   - Wait 5-30 seconds
+   - View modal with AI recommendations
+
+4. Check Recommendation Count:
+   $ cat test_data/recommendations.json | jq '.recommendations | length'
+   
+   Output: 3 (one per disrupted flight)
+
+
+================================================================================

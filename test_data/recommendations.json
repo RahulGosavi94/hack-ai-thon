@@ -1,0 +1,350 @@
+{
+  "recommendations": [
+    {
+      "disruption_id": "DISR_EY129",
+      "flight_number": "EY129",
+      "recommendation_id": "9aed20c3-9583-42e1-9194-f5250cfa53e0",
+      "generated_at": "2025-11-26T23:02:37.492925",
+      "priority": "URGENT",
+      "initial_communications": {
+        "send_immediately": true,
+        "channels": [
+          {
+            "type": "SMS",
+            "template": "Flight {{flight_number}} from {{origin}} to {{destination}} is disrupted. Updates will follow shortly. Reply HELP for assistance.",
+            "priority": "URGENT",
+            "eta_minutes": 2,
+            "required": true
+          },
+          {
+            "type": "Email",
+            "template": "Dear Passenger, Your flight {{flight_number}} (Booking {{pnr}}) has experienced a {{disruption_reason}}. Delay: {{delay}} minutes. Our team is working on solutions. Expect rebooked options within 1 hour.",
+            "priority": "HIGH",
+            "eta_minutes": 5,
+            "required": true
+          },
+          {
+            "type": "App Notification",
+            "template": "Flight disruption alert: {{flight_number}} delayed {{delay}} mins. Check app for rebooking options.",
+            "priority": "HIGH",
+            "eta_minutes": 1,
+            "required": true
+          }
+        ],
+        "message": "IMMEDIATE: Send out initial comms to all 346 passengers. Target: < 5 minutes to all channels.",
+        "status": "Pending"
+      },
+      "rebooking_options": [
+        {
+          "option_id": 1,
+          "flight_number": "EY100",
+          "departure": "2025-11-27T08:00:00.000000",
+          "seats_available": 104,
+          "cabin_upgrade": false
+        },
+        {
+          "option_id": 2,
+          "flight_number": "EY101",
+          "departure": "2025-11-27T06:30:00.000000",
+          "seats_available": 229,
+          "cabin_upgrade": false
+        },
+        {
+          "option_id": 3,
+          "flight_number": "EY102",
+          "departure": "2025-11-27T07:30:00.000000",
+          "seats_available": 189,
+          "cabin_upgrade": false
+        }
+      ],
+      "vouchers": [
+        {
+          "type": "meal",
+          "amount": 25,
+          "quantity": 346
+        },
+        {
+          "type": "hotel",
+          "amount": 150,
+          "quantity": 173
+        },
+        {
+          "type": "transportation",
+          "amount": 50,
+          "quantity": 115
+        }
+      ],
+      "compensation": [
+        {
+          "type": "EU261_cash",
+          "amount": 125,
+          "eligible_passengers": 242,
+          "conditions": "Applies to EU/UK departing flights with 3+ hour delay"
+        }
+      ],
+      "operational_actions": [
+        "Secure standby aircraft from partner airline",
+        "Confirm crew availability for rebooked flights",
+        "Pre-position ground staff for passenger rebooking"
+      ],
+      "status": "Pending",
+      "source": "AI-Recommendation Engine"
+    },
+    {
+      "disruption_id": "DISR_EY245",
+      "flight_number": "EY245",
+      "recommendation_id": "9000391d-14a2-40c9-902f-3bfbd6705593",
+      "generated_at": "2025-11-26T23:02:37.492938",
+      "priority": "URGENT",
+      "initial_communications": {
+        "send_immediately": true,
+        "channels": [
+          {
+            "type": "SMS",
+            "template": "Flight {{flight_number}} from {{origin}} to {{destination}} is disrupted. Updates will follow shortly. Reply HELP for assistance.",
+            "priority": "URGENT",
+            "eta_minutes": 2,
+            "required": true
+          },
+          {
+            "type": "Email",
+            "template": "Dear Passenger, Your flight {{flight_number}} (Booking {{pnr}}) has experienced a {{disruption_reason}}. Delay: {{delay}} minutes. Our team is working on solutions. Expect rebooked options within 1 hour.",
+            "priority": "HIGH",
+            "eta_minutes": 5,
+            "required": true
+          },
+          {
+            "type": "App Notification",
+            "template": "Flight disruption alert: {{flight_number}} delayed {{delay}} mins. Check app for rebooking options.",
+            "priority": "HIGH",
+            "eta_minutes": 1,
+            "required": true
+          }
+        ],
+        "message": "IMMEDIATE: Send out initial comms to all 311 passengers. Target: < 5 minutes to all channels.",
+        "status": "Pending"
+      },
+      "rebooking_options": [
+        {
+          "option_id": 1,
+          "flight_number": "EY102",
+          "departure": "2025-11-27T07:30:00.000000",
+          "seats_available": 189,
+          "cabin_upgrade": false
+        },
+        {
+          "option_id": 2,
+          "flight_number": "EY200",
+          "departure": "2025-11-27T09:00:00.000000",
+          "seats_available": 150,
+          "cabin_upgrade": false
+        },
+        {
+          "option_id": 3,
+          "flight_number": "EY201",
+          "departure": "2025-11-27T10:30:00.000000",
+          "seats_available": 120,
+          "cabin_upgrade": false
+        }
+      ],
+      "vouchers": [
+        {
+          "type": "meal",
+          "amount": 25,
+          "quantity": 311
+        },
+        {
+          "type": "hotel",
+          "amount": 150,
+          "quantity": 155
+        },
+        {
+          "type": "transportation",
+          "amount": 50,
+          "quantity": 103
+        }
+      ],
+      "compensation": [
+        {
+          "type": "EU261_cash",
+          "amount": 125,
+          "eligible_passengers": 217,
+          "conditions": "Applies to EU/UK departing flights with 3+ hour delay"
+        }
+      ],
+      "operational_actions": [
+        "Secure standby aircraft from partner airline",
+        "Confirm crew availability for rebooked flights",
+        "Pre-position ground staff for passenger rebooking"
+      ],
+      "status": "Pending",
+      "source": "AI-Recommendation Engine"
+    },
+    {
+      "disruption_id": "DISR_EY567",
+      "flight_number": "EY567",
+      "recommendation_id": "e4165a0a-60bd-40e9-8869-5dc314332486",
+      "generated_at": "2025-11-26T23:02:37.492947",
+      "priority": "URGENT",
+      "initial_communications": {
+        "send_immediately": true,
+        "channels": [
+          {
+            "type": "SMS",
+            "template": "Flight {{flight_number}} from {{origin}} to {{destination}} is disrupted. Updates will follow shortly. Reply HELP for assistance.",
+            "priority": "URGENT",
+            "eta_minutes": 2,
+            "required": true
+          },
+          {
+            "type": "Email",
+            "template": "Dear Passenger, Your flight {{flight_number}} (Booking {{pnr}}) has experienced a {{disruption_reason}}. Delay: {{delay}} minutes. Our team is working on solutions. Expect rebooked options within 1 hour.",
+            "priority": "HIGH",
+            "eta_minutes": 5,
+            "required": true
+          },
+          {
+            "type": "App Notification",
+            "template": "Flight disruption alert: {{flight_number}} delayed {{delay}} mins. Check app for rebooking options.",
+            "priority": "HIGH",
+            "eta_minutes": 1,
+            "required": true
+          }
+        ],
+        "message": "IMMEDIATE: Send out initial comms to all 315 passengers. Target: < 5 minutes to all channels.",
+        "status": "Pending"
+      },
+      "rebooking_options": [
+        {
+          "option_id": 1,
+          "flight_number": "EY202",
+          "departure": "2025-11-27T07:00:00.000000",
+          "seats_available": 166,
+          "cabin_upgrade": false
+        },
+        {
+          "option_id": 2,
+          "flight_number": "EY201",
+          "departure": "2025-11-27T08:30:00.000000",
+          "seats_available": 148,
+          "cabin_upgrade": false
+        }
+      ],
+      "vouchers": [
+        {
+          "type": "meal",
+          "amount": 25,
+          "quantity": 315
+        },
+        {
+          "type": "hotel",
+          "amount": 150,
+          "quantity": 157
+        },
+        {
+          "type": "transportation",
+          "amount": 50,
+          "quantity": 105
+        }
+      ],
+      "compensation": [
+        {
+          "type": "EU261_cash",
+          "amount": 250,
+          "eligible_passengers": 220,
+          "conditions": "Applies to EU/UK departing flights with 3+ hour delay"
+        }
+      ],
+      "operational_actions": [
+        "Secure standby aircraft from partner airline",
+        "Confirm crew availability for rebooked flights",
+        "Pre-position ground staff for passenger rebooking"
+      ],
+      "status": "Pending",
+      "source": "AI-Recommendation Engine"
+    },
+    {
+      "disruption_id": "8ba525b7-0a02-4553-be62-2a29e15d3600",
+      "flight_number": "EY689",
+      "recommendation_id": "68563409-451a-4e68-b364-3bb2e636091e",
+      "generated_at": "2025-11-26T23:02:37.492955",
+      "priority": "URGENT",
+      "initial_communications": {
+        "send_immediately": true,
+        "channels": [
+          {
+            "type": "SMS",
+            "template": "Flight {{flight_number}} from {{origin}} to {{destination}} is disrupted. Updates will follow shortly. Reply HELP for assistance.",
+            "priority": "URGENT",
+            "eta_minutes": 2,
+            "required": true
+          },
+          {
+            "type": "Email",
+            "template": "Dear Passenger, Your flight {{flight_number}} (Booking {{pnr}}) has experienced a {{disruption_reason}}. Delay: {{delay}} minutes. Our team is working on solutions. Expect rebooked options within 1 hour.",
+            "priority": "HIGH",
+            "eta_minutes": 5,
+            "required": true
+          },
+          {
+            "type": "App Notification",
+            "template": "Flight disruption alert: {{flight_number}} delayed {{delay}} mins. Check app for rebooking options.",
+            "priority": "HIGH",
+            "eta_minutes": 1,
+            "required": true
+          }
+        ],
+        "message": "IMMEDIATE: Send out initial comms to all 330 passengers. Target: < 5 minutes to all channels.",
+        "status": "Pending"
+      },
+      "rebooking_options": [
+        {
+          "option_id": 1,
+          "flight_number": "EY795",
+          "departure": "2025-11-27T01:02:37.492956",
+          "seats_available": 90,
+          "cabin_upgrade": true
+        },
+        {
+          "option_id": 2,
+          "flight_number": "EY828",
+          "departure": "2025-11-27T03:02:37.492959",
+          "seats_available": 178,
+          "cabin_upgrade": false
+        }
+      ],
+      "vouchers": [
+        {
+          "type": "meal",
+          "amount": 25,
+          "quantity": 330
+        },
+        {
+          "type": "hotel",
+          "amount": 150,
+          "quantity": 165
+        },
+        {
+          "type": "transportation",
+          "amount": 50,
+          "quantity": 110
+        }
+      ],
+      "compensation": [
+        {
+          "type": "EU261_cash",
+          "amount": 125,
+          "eligible_passengers": 230,
+          "conditions": "Applies to EU/UK departing flights with 3+ hour delay"
+        }
+      ],
+      "operational_actions": [
+        "Secure standby aircraft from partner airline",
+        "Confirm crew availability for rebooked flights",
+        "Pre-position ground staff for passenger rebooking"
+      ],
+      "status": "Pending",
+      "source": "AI-Recommendation Engine"
+    }
+  ]
+}

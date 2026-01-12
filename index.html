@@ -1,0 +1,3419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airline Disruption Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .nav-tabs {
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #666;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: #667eea;
+            color: white;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .flight-card {
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .flight-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .flight-card.disrupted {
+            border-left-color: #dc3545;
+            background-color: #fff5f5;
+        }
+        
+        .badge.badge-disrupted {
+            background-color: #dc3545 !important;
+            color: white !important;
+        }
+        
+        .badge.badge-ontime {
+            background-color: #28a745 !important;
+            color: white !important;
+        }
+        
+        .flight-number {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .delay-badge {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .passenger-row {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 0;
+        }
+        
+        .passenger-row:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .vip-badge {
+            background-color: #ffc107;
+            color: #000;
+            font-weight: bold;
+        }
+        
+        .critical-badge {
+            background-color: #dc3545;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .btn-action {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+            margin: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .summary-card {
+            border-radius: 12px;
+            padding: 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+            transition: transform 0.3s ease;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .summary-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .summary-label {
+            color: #6c757d;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+        
+        .detail-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 8px 8px 0 0;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            background: #f8f9fa;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+            border-color: transparent;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .badge {
+            padding: 6px 12px;
+            font-weight: 500;
+            border-radius: 6px;
+        }
+        
+        h2, h3, h4, h5, h6 {
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        }
+        
+        .alert-success, .alert-danger {
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand">✈️ Airline Disruption Management System</span>
+            <div>
+                <span id="last-refresh" class="badge bg-info me-2">Last refreshed just now</span>
+                <button class="btn btn-sm btn-light" onclick="refreshAllData()">🔄 Refresh Now</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-4" id="mainTabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" data-tab="flights">📋 Flight List</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-tab="details">✈️ Flight Details</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-tab="passengers">👥 Passenger Impact</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-tab="suggestions">🤖 AI Suggestions</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-tab="summary">📊 Manager Summary</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-tab="mass-meals">🍽️ Mass Meal Issuance</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-tab="mass-rebooking">✈️ Mass Rebooking</a>
+            </li>
+        </ul>
+
+        <!-- Alert Area -->
+        <div id="alert-area"></div>
+
+        <!-- 1. Flight List Page -->
+        <div id="flights-tab" class="tab-content">
+            <h2 class="mb-4">All Flights</h2>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="detail-section mb-3">
+                        <input type="text" id="flight-filter" class="form-control" placeholder="Filter by flight number..." onkeyup="filterFlights()">
+                    </div>
+                    <div id="flights-list"></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="detail-section">
+                        <h5>📈 Quick Stats</h5>
+                        <p><strong>Total Flights:</strong> <span id="stat-total-flights">-</span></p>
+                        <p><strong>Disrupted:</strong> <span id="stat-disrupted" class="badge bg-danger">-</span></p>
+                        <p><strong>On Time:</strong> <span id="stat-ontime" class="badge bg-success">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Flight Details Page -->
+        <div id="details-tab" class="tab-content" style="display:none;">
+            <h2 class="mb-4">Flight Details</h2>
+            <div id="flight-details-container" class="detail-section">
+                <p class="text-muted">Select a disrupted flight from the Flight List to view details.</p>
+            </div>
+        </div>
+
+        <!-- 3. Passenger Impact + AI Suggestions Page -->
+        <div id="passengers-tab" class="tab-content" style="display:none;">
+            <h2 class="mb-4">Passenger Impact & AI Suggestions</h2>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="detail-section">
+                        <h5>Filters</h5>
+                        <div class="form-group mb-3">
+                            <label>Flight Number</label>
+                            <input type="text" id="passenger-flight-filter" class="form-control form-control-sm" placeholder="Search..." onkeyup="filterPassengersByFlight()">
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="filter-vip">
+                            <label class="form-check-label">VIP Only (Gold/Platinum)</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="filter-ssr">
+                            <label class="form-check-label">Special Service Requests</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="filter-connections">
+                            <label class="form-check-label">Connections</label>
+                        </div>
+                        <button class="btn btn-sm btn-primary w-100" onclick="applyPassengerFilters()">Apply Filters</button>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div id="passengers-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. AI Suggestions Page -->
+        <div id="suggestions-tab" class="tab-content" style="display:none;">
+            <h2 class="mb-4">🤖 AI Suggestions</h2>
+            <div id="suggestions-container"></div>
+        </div>
+
+        <!-- 5. Manager Summary Page -->
+        <div id="summary-tab" class="tab-content" style="display:none;">
+            <h2 class="mb-4">Manager Dashboard</h2>
+            <div class="row" id="summary-cards"></div>
+            
+            <!-- Actioned Passengers Section -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="detail-section">
+                        <h5>✅ Actioned Passengers</h5>
+                        <div id="actioned-passengers-list"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="detail-section">
+                        <h5>Actions</h5>
+                        <button class="btn btn-success btn-lg" onclick="approveExecute()">
+                            ✅ Approve & Execute All Recommendations
+                        </button>
+                        <button class="btn btn-secondary btn-lg ms-2" onclick="exportReport()">
+                            📄 Export Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Mass Meal Issuance Page -->
+        <div id="mass-meals-tab" class="tab-content" style="display: none;">
+            <h2 class="mb-4">🍽️ Mass Meal Issuance</h2>
+            <div class="detail-section">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label"><strong>Select Flight:</strong></label>
+                        <select id="mass-meal-flight-select" class="form-select" onchange="loadPassengersForMassMeal()">
+                            <option value="">-- Select a Flight --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button class="btn btn-primary me-2" onclick="selectAllMealPassengers()">
+                            ✅ Select All
+                        </button>
+                        <button class="btn btn-secondary me-2" onclick="deselectAllMealPassengers()">
+                            ❌ Deselect All
+                        </button>
+                        <button class="btn btn-success" onclick="issueMassMeals()" id="issue-mass-meals-btn" disabled>
+                            🍽️ Issue Meal Vouchers (<span id="meal-selected-count">0</span> selected)
+                        </button>
+                    </div>
+                </div>
+                <div id="mass-meal-passengers-container" class="mt-4">
+                    <p class="text-muted">Select a flight to view passengers</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Mass Rebooking Page -->
+        <div id="mass-rebooking-tab" class="tab-content" style="display: none;">
+            <h2 class="mb-4">✈️ Mass Rebooking</h2>
+            <div class="detail-section">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label"><strong>Select Disrupted Flight:</strong></label>
+                        <select id="mass-rebooking-flight-select" class="form-select" onchange="loadPassengersForMassRebooking()">
+                            <option value="">-- Select a Flight --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><strong>Select Alternative Flight:</strong></label>
+                        <select id="mass-rebooking-alternative-select" class="form-select" disabled>
+                            <option value="">-- Select passengers first --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button class="btn btn-primary me-2" onclick="selectAllRebookingPassengers()">
+                            ✅ Select All
+                        </button>
+                        <button class="btn btn-secondary me-2" onclick="deselectAllRebookingPassengers()">
+                            ❌ Deselect All
+                        </button>
+                        <button class="btn btn-success" onclick="processMassRebooking()" id="process-mass-rebooking-btn" disabled>
+                            ✈️ Rebook (<span id="rebooking-selected-count">0</span>)
+                        </button>
+                    </div>
+                </div>
+                <div id="mass-rebooking-passengers-container" class="mt-4">
+                    <p class="text-muted">Select a flight to view passengers</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Flight Details Modal with Tabs -->
+    <div class="modal fade" id="flightModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Flight Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs" role="tablist" style="border-bottom: 2px solid #ddd; padding-left: 15px; padding-top: 10px;">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="flight-info-tab" data-bs-toggle="tab" data-bs-target="#flight-info-content" type="button" role="tab">
+                            ✈️ Flight Info
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="ollama-suggestions-tab" data-bs-toggle="tab" data-bs-target="#ollama-suggestions-content" type="button" role="tab">
+                            🤖 AI Suggestions
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Tabs Content -->
+                <div class="tab-content" style="padding: 15px;">
+                    <!-- Tab 1: Flight Info -->
+                    <div class="tab-pane fade show active" id="flight-info-content" role="tabpanel">
+                        <div id="modal-flight-details"></div>
+                    </div>
+                    
+                    <!-- Tab 2: Ollama Suggestions -->
+                    <div class="tab-pane fade" id="ollama-suggestions-content" role="tabpanel">
+                        <div id="modal-ollama-suggestions">
+                            <div class="alert alert-info">
+                                <p>Click <strong>"Generate AI Suggestions"</strong> button at the bottom to load Ollama recommendations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="generateAndDisplayRecommendations()">🤖 Generate AI Suggestions</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Modal -->
+    <div class="modal fade" id="recommendationsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">AI Recommendations</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modal-recommendations"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rebook Options Modal -->
+    <div class="modal fade" id="rebookModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">🔄 Rebooking Options</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modal-rebook-options" style="max-height: 500px; overflow-y: auto;"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Composer Modal -->
+    <div class="modal fade" id="messageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">📧 Send Message to Passenger</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="message-passenger-info" class="mb-3">
+                        <small class="text-muted" id="message-passenger-details"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="form-label">Message</label>
+                        <textarea id="message-text" class="form-control" rows="6" placeholder="Enter your message..."></textarea>
+                    </div>
+                    <small class="text-muted">You can use predefined templates or write a custom message</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitPassengerMessage()">Send Message</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Passenger Suggestions Modal -->
+    <div class="modal fade" id="passengerSuggestionsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div id="passengerSuggestionsModalContent">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meal Coupon Dialog -->
+    <div class="modal fade" id="mealCouponDialog" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #fff3cd; border-bottom: 2px solid #ffc107;">
+                    <h5 class="modal-title">🎟️ Issue Meal Coupon</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3" style="background-color: #f9f9f9; padding: 10px; border-radius: 5px;">
+                        <strong>Passenger:</strong> <span id="mealCoupon_name"></span><br>
+                        <strong>PNR:</strong> <span id="mealCoupon_pnr"></span><br>
+                        <strong>Flight:</strong> <span id="mealCoupon_flight"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="mealCoupon_amount" class="form-label">Coupon Amount ($)</label>
+                        <input type="number" class="form-control" id="mealCoupon_amount" min="0" step="5">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="mealCoupon_quantity" class="form-label">Quantity</label>
+                        <input type="number" class="form-control" id="mealCoupon_quantity" min="1" value="1">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="mealCoupon_notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="mealCoupon_notes" rows="2" placeholder="Optional notes..."></textarea>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Total Value:</strong> $<span id="mealCoupon_total">0</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" onclick="submitMealCoupon()">✓ Issue Coupon</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hotel Voucher Dialog -->
+    <div class="modal fade" id="hotelVoucherDialog" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #e3f2fd; border-bottom: 2px solid #1976d2;">
+                    <h5 class="modal-title">🏨 Book Hotel Accommodation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3" style="background-color: #f9f9f9; padding: 10px; border-radius: 5px;">
+                        <strong>Passenger:</strong> <span id="hotelVoucher_name"></span><br>
+                        <strong>PNR:</strong> <span id="hotelVoucher_pnr"></span><br>
+                        <strong>Flight:</strong> <span id="hotelVoucher_flight"></span>
+                    </div>
+
+                    <!-- Hotel Selection -->
+                    <div class="mb-3">
+                        <label class="form-label"><strong>🏢 Available Hotels</strong></label>
+                        <div id="hotelList" style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px;">
+                            <!-- Hotels will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Room Selection -->
+                    <div class="mb-3">
+                        <label class="form-label"><strong>🛏️ Available Rooms</strong></label>
+                        <div id="roomList" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                            <p class="text-muted p-2">Select a hotel first</p>
+                        </div>
+                    </div>
+
+                    <!-- Room Details (shown when selected) -->
+                    <div id="roomDetailsSection" style="display: none;" class="mb-3">
+                        <div class="alert alert-light border">
+                            <div><strong>Selected Room:</strong> <span id="selectedRoomDisplay"></span></div>
+                            <div><strong>Price per Night:</strong> $<span id="selectedRoomPrice"></span></div>
+                            <div><strong>Room Type:</strong> <span id="selectedRoomType"></span></div>
+                        </div>
+                    </div>
+
+                    <!-- Booking Details -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="hotelVoucher_nights" class="form-label">Number of Nights</label>
+                                <input type="number" class="form-control" id="hotelVoucher_nights" min="1" value="1" onchange="updateHotelVoucherTotal()">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="hotelVoucher_checkin" class="form-label">Check-in Date</label>
+                                <input type="date" class="form-control" id="hotelVoucher_checkin">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="hotelVoucher_notes" class="form-label">Special Requests</label>
+                        <textarea class="form-control" id="hotelVoucher_notes" rows="2" placeholder="e.g., High floor, Near elevator, etc."></textarea>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Total Cost:</strong> $<span id="hotelVoucher_total">0</span> 
+                        <span style="font-size: 0.9em; color: #666;">(<span id="hotelVoucher_priceBreakdown"></span>)</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitHotelVoucher()">✓ Book Room</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compensation Dialog -->
+    <div class="modal fade" id="compensationDialog" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #e8f5e9; border-bottom: 2px solid #2e7d32;">
+                    <h5 class="modal-title">💰 Approve Compensation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3" style="background-color: #f9f9f9; padding: 10px; border-radius: 5px;">
+                        <strong>Passenger:</strong> <span id="compensation_name"></span><br>
+                        <strong>PNR:</strong> <span id="compensation_pnr"></span><br>
+                        <strong>Flight:</strong> <span id="compensation_flight"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="compensation_amount" class="form-label">Compensation Amount ($)</label>
+                        <input type="number" class="form-control" id="compensation_amount" min="0" step="25">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="compensation_reason" class="form-label">Reason</label>
+                        <input type="text" class="form-control" id="compensation_reason" readonly>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="compensation_regulation" class="form-label">Regulation</label>
+                        <input type="text" class="form-control" id="compensation_regulation" readonly>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="compensation_method" class="form-label">Payment Method</label>
+                        <select class="form-control" id="compensation_method">
+                            <option>Cash</option>
+                            <option>Credit Card</option>
+                            <option>Bank Transfer</option>
+                            <option>Voucher</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="compensation_notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="compensation_notes" rows="2" placeholder="Optional notes..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="submitCompensation()">✓ Approve Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rebooking Dialog -->
+    <div class="modal fade" id="rebookingDialog" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #e7f5ff; border-bottom: 2px solid #1971c2;">
+                    <h5 class="modal-title">✈️ Book Rebooking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3" style="background-color: #f9f9f9; padding: 10px; border-radius: 5px;">
+                        <strong>Passenger:</strong> <span id="rebooking_name"></span><br>
+                        <strong>PNR:</strong> <span id="rebooking_pnr"></span><br>
+                        <strong>Original Flight:</strong> <span id="rebooking_original"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="rebooking_new_flight" class="form-label">New Flight</label>
+                        <input type="text" class="form-control" id="rebooking_new_flight" readonly>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="rebooking_seat" class="form-label">Seat Number</label>
+                        <input type="text" class="form-control" id="rebooking_seat" placeholder="e.g., 12A">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="rebooking_class" class="form-label">Cabin Class</label>
+                        <input type="text" class="form-control" id="rebooking_class" readonly>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="rebooking_upgrade">
+                        <label class="form-check-label" for="rebooking_upgrade">
+                            Cabin Upgrade
+                        </label>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="rebooking_notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="rebooking_notes" rows="2" placeholder="Optional notes..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitRebooking()">✓ Confirm Rebooking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Dialog -->
+    <div class="modal fade" id="messageDialog" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #f3e5f5; border-bottom: 2px solid #7b1fa2;">
+                    <h5 class="modal-title">📧 Send Message</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3" style="background-color: #f9f9f9; padding: 10px; border-radius: 5px;">
+                        <strong>Passenger:</strong> <span id="message_name"></span><br>
+                        <strong>Email:</strong> <span id="message_email"></span><br>
+                        <strong>Flight:</strong> <span id="message_flight"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="message_type" class="form-label">Message Type</label>
+                        <select class="form-control" id="message_type">
+                            <option>Email</option>
+                            <option>SMS</option>
+                            <option>App Notification</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="message_subject" class="form-label">Subject (Email only)</label>
+                        <input type="text" class="form-control" id="message_subject" placeholder="Email subject...">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="message_body" class="form-label">Message</label>
+                        <textarea class="form-control" id="message_body" rows="4" placeholder="Enter message..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitMessage()">✓ Send Message</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ========================
+        // Configuration
+        // ========================
+        const API_BASE = 'http://localhost:5000/api';
+        let currentFlight = null;
+        let currentDisruption = null;
+        let allFlights = [];
+        let allDisruptions = [];
+        let allRecommendations = [];
+        let allPassengers = [];
+        let lastRefreshTime = Date.now();
+        
+        // Track selected recommendations per passenger
+        let selectedRecommendations = {};
+        
+        // Current passenger for message composition
+        let currentMessagePassenger = null;
+
+        // ========================
+        // Utility Functions
+        // ========================
+        function updateRefreshTime() {
+            lastRefreshTime = Date.now();
+            document.getElementById('last-refresh').innerHTML = 'Last refreshed just now';
+        }
+        
+        function updateRefreshDisplay() {
+            const diff = Math.floor((Date.now() - lastRefreshTime) / 1000);
+            if (diff < 60) {
+                document.getElementById('last-refresh').innerHTML = `Last refreshed ${diff}s ago`;
+            } else {
+                const mins = Math.floor(diff / 60);
+                document.getElementById('last-refresh').innerHTML = `Last refreshed ${mins}m ago`;
+            }
+        }
+        
+        // Update display every 5 seconds
+        setInterval(updateRefreshDisplay, 5000);
+
+        function refreshAllData() {
+            fetchFlights();
+            fetchDisruptions();
+            updateRefreshTime();
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.getElementById('alert-area').appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        function formatDateTime(dt) {
+            if (!dt) return 'N/A';
+            return new Date(dt).toLocaleString();
+        }
+
+        function formatDate(dt) {
+            if (!dt) return 'N/A';
+            return new Date(dt).toLocaleDateString();
+        }
+
+        function filterFlights() {
+            const filter = document.getElementById('flight-filter').value.toUpperCase();
+            const flights = document.querySelectorAll('.flight-card');
+            flights.forEach(flight => {
+                const flightNum = flight.querySelector('.flight-number').textContent;
+                flight.style.display = flightNum.includes(filter) ? 'block' : 'none';
+            });
+        }
+
+        function filterPassengersByFlight() {
+            const filter = document.getElementById('passenger-flight-filter')?.value.toUpperCase() || '';
+            const flightSections = document.querySelectorAll('[data-flight-section]');
+            flightSections.forEach(section => {
+                const flightNum = section.getAttribute('data-flight-section');
+                section.style.display = flightNum.includes(filter) ? 'block' : 'none';
+            });
+        }
+
+        // ========================
+        // API Functions
+        // ========================
+        async function fetchFlights() {
+            try {
+                const response = await fetch(`${API_BASE}/flights`);
+                const data = await response.json();
+                allFlights = data.flights;
+                renderFlightsList();
+                updateFlightStats();
+                updateRefreshTime();
+            } catch (e) {
+                showAlert('Error loading flights: ' + e.message, 'danger');
+            }
+        }
+
+        async function fetchFlightDetails(flightId) {
+            try {
+                const response = await fetch(`${API_BASE}/flights/${flightId}`);
+                const data = await response.json();
+                currentFlight = data;
+                renderFlightDetailsModal(data);
+            } catch (e) {
+                showAlert('Error loading flight details: ' + e.message, 'danger');
+            }
+        }
+
+        async function fetchDisruptions() {
+            try {
+                const response = await fetch(`${API_BASE}/disruptions`);
+                const data = await response.json();
+                allDisruptions = data.disruptions;
+            } catch (e) {
+                showAlert('Error loading disruptions: ' + e.message, 'danger');
+            }
+        }
+
+        let currentFlightId = null;
+
+        async function fetchPassengers(flightId) {
+            currentFlightId = flightId; // Store for refresh
+            try {
+                const vipOnly = document.getElementById('filter-vip').checked;
+                const ssrOnly = document.getElementById('filter-ssr').checked;
+                const connectionsOnly = document.getElementById('filter-connections').checked;
+                
+                let url = `${API_BASE}/flights/${flightId}/passengers?`;
+                if (vipOnly) url += '&vip=true';
+                if (ssrOnly) url += '&ssr=true';
+                if (connectionsOnly) url += '&connections=true';
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                renderPassengersList(data.passengers);
+            } catch (e) {
+                showAlert('Error loading passengers: ' + e.message, 'danger');
+            }
+        }
+
+        async function fetchManagerSummary() {
+            try {
+                const response = await fetch(`${API_BASE}/manager-summary`);
+                const data = await response.json();
+                renderManagerSummary(data);
+                renderActionedPassengers(); // Show actioned passengers
+            } catch (e) {
+                showAlert('Error loading summary: ' + e.message, 'danger');
+            }
+        }
+        
+        function renderActionedPassengers() {
+            const container = document.getElementById('actioned-passengers-list');
+            
+            if (Object.keys(passengerActions).length === 0) {
+                container.innerHTML = '<p class="text-muted">No actions taken yet.</p>';
+                return;
+            }
+            
+            // Get all passengers who have actions and group by flight
+            const actionedByFlight = {};
+            
+            // Fetch passenger details from allPassengers
+            Object.keys(passengerActions).forEach(passengerId => {
+                const passenger = allPassengers.find(p => (p.id || p.passenger_id) === passengerId);
+                if (passenger) {
+                    const flightNum = passenger.flight_number || 'Unknown';
+                    if (!actionedByFlight[flightNum]) {
+                        actionedByFlight[flightNum] = [];
+                    }
+                    actionedByFlight[flightNum].push({
+                        passenger: passenger,
+                        actions: passengerActions[passengerId]
+                    });
+                }
+            });
+            
+            let html = '';
+            Object.keys(actionedByFlight).forEach(flightNum => {
+                html += `
+                    <div class="mb-4">
+                        <h6 style="color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 8px;">
+                            ✈️ Flight ${flightNum} - ${actionedByFlight[flightNum].length} Passenger(s) Actioned
+                        </h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Passenger</th>
+                                        <th>PNR</th>
+                                        <th>Actions Taken</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+                
+                actionedByFlight[flightNum].forEach(item => {
+                    const p = item.passenger;
+                    const actions = item.actions;
+                    html += `
+                        <tr>
+                            <td><strong>${p.passenger_name || p.full_name}</strong></td>
+                            <td>${p.pnr}</td>
+                            <td>
+                                ${actions.map(action => `<span class="badge bg-success me-1">${action.icon}</span>`).join('')}
+                            </td>
+                            <td style="font-size: 0.85rem;">
+                                ${actions.map(action => `<div>${action.icon} ${action.label}</div>`).join('')}
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        async function generateRecommendations() {
+            if (!currentFlight) return;
+            
+            try {
+                document.querySelector('.modal-footer .btn-primary').disabled = true;
+                document.querySelector('.modal-footer .btn-primary').innerHTML = '<span class="loading"></span> Generating...';
+                
+                const response = await fetch(`${API_BASE}/recommendations/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ flight_id: currentFlight.flight.flight_id })
+                });
+                
+                const data = await response.json();
+                showAlert('✅ AI recommendations generated!', 'success');
+                
+                // Fetch and show recommendations
+                const disruptionId = `DISR_${currentFlight.flight.flight_id.substring(0, 8)}`;
+                fetchRecommendation(disruptionId);
+            } catch (e) {
+                showAlert('Error generating recommendations: ' + e.message, 'danger');
+            } finally {
+                document.querySelector('.modal-footer .btn-primary').disabled = false;
+                document.querySelector('.modal-footer .btn-primary').innerHTML = '🤖 Generate AI Suggestions';
+            }
+        }
+
+        async function generateAndDisplayRecommendations() {
+            if (!currentFlight) return;
+            
+            try {
+                // Hide and disable the button
+                const btn = document.getElementById('generate-suggestions-btn');
+                if (btn) {
+                    btn.style.display = 'none';
+                }
+                
+                const response = await fetch(`${API_BASE}/recommendations/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ flight_id: currentFlight.flight.flight_id })
+                });
+                
+                const data = await response.json();
+                showAlert('✅ AI recommendations generated!', 'success');
+                
+                // Fetch and show recommendations in suggestions tab
+                const disruptionId = `DISR_${currentFlight.flight.flight_number}`;
+                console.log('generateAndDisplayRecommendations: Fetching for', disruptionId);
+                await fetchRecommendationForTab(disruptionId);
+                
+                // Switch to AI Suggestions tab
+                document.querySelector('[data-tab="suggestions"]').click();
+            } catch (e) {
+                showAlert('Error generating recommendations: ' + e.message, 'danger');
+            }
+        }
+
+        async function fetchRecommendationForTab(disruptionId) {
+            try {
+                console.log('fetchRecommendationForTab: Fetching for', disruptionId);
+                const response = await fetch(`${API_BASE}/disruptions/${disruptionId}/recommendations`);
+                const data = await response.json();
+                console.log('fetchRecommendationForTab: Got data:', data);
+                renderOllamaSuggestionsTab(data);
+            } catch (e) {
+                console.log('fetchRecommendationForTab: Error:', e);
+                // Recommendations not found, fetch all and display
+                await fetchDisruptions();
+                const rec = allRecommendations.find(r => r.disruption_id === disruptionId);
+                console.log('fetchRecommendationForTab: Found from allRecommendations:', rec);
+                if (rec) renderOllamaSuggestionsTab(rec);
+            }
+        }
+
+        // Track completed actions per passenger
+        const passengerActions = {};
+        let isGeneratingSuggestions = false;
+
+        async function generatePassengerSuggestions(passengerId) {
+            if (isGeneratingSuggestions) {
+                console.log('Already generating suggestions, please wait...');
+                return;
+            }
+            
+            console.log('Looking for passenger ID:', passengerId);
+            console.log('Available passengers:', allPassengers.length);
+            
+            // Find passenger from allPassengers array
+            const passenger = allPassengers.find(p => {
+                const pid = p.id || p.passenger_id;
+                console.log('Comparing:', pid, 'with', passengerId);
+                return pid === passengerId;
+            });
+            
+            if (!passenger) {
+                console.error('Passenger not found. ID:', passengerId);
+                console.error('Available IDs:', allPassengers.map(p => p.id || p.passenger_id));
+                showAlert('Passenger not found', 'danger');
+                return;
+            }
+            
+            const passengerName = passenger.passenger_name || passenger.full_name || 'Passenger';
+            
+            try {
+                isGeneratingSuggestions = true;
+                
+                // Clear modal content first
+                document.getElementById('passengerSuggestionsModalContent').innerHTML = `
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Generating AI suggestions for ${passengerName}...</p>
+                    </div>
+                `;
+                
+                // Show modal with loading state
+                const modalElement = document.getElementById('passengerSuggestionsModal');
+                const modalInstance = new bootstrap.Modal(modalElement);
+                modalInstance.show();
+                
+                showAlert(`🤖 Generating personalized suggestions for ${passengerName}...`, 'info');
+                
+                const response = await fetch(`${API_BASE}/passenger-suggestions/${passengerId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const suggestions = await response.json();
+                
+                // Add completed actions to suggestions
+                if (passengerActions[passengerId]) {
+                    suggestions.completed_actions = passengerActions[passengerId];
+                }
+                
+                renderPassengerSuggestionsModal(suggestions);
+                
+            } catch (e) {
+                showAlert('Error generating passenger suggestions: ' + e.message, 'danger');
+                document.getElementById('passengerSuggestionsModalContent').innerHTML = `
+                    <div class="alert alert-danger m-3">
+                        <strong>Error:</strong> ${e.message}
+                    </div>
+                `;
+            } finally {
+                isGeneratingSuggestions = false;
+            }
+        }
+
+        function renderPassengerSuggestionsModal(suggestions) {
+            const modal = document.getElementById('passengerSuggestionsModal');
+            
+            // Store passenger context for action dialogs
+            currentActionContext.passenger = suggestions;
+            currentActionContext.currentPassengerId = suggestions.passenger_id;
+            
+            // Get eligibility actions list
+            const eligibleActions = suggestions.eligibility?.actions || [];
+            const isEligibleFor = (action) => eligibleActions.includes(action);
+            
+            // Determine priority badge color
+            const priorityColor = suggestions.priority === 'CRITICAL' ? '#d32f2f' : 
+                                  suggestions.priority === 'HIGH' ? '#f57c00' : '#1976d2';
+            const connectionRiskColor = suggestions.connection_assistance?.connection_risk === 'HIGH' ? '#d32f2f' :
+                                        suggestions.connection_assistance?.connection_risk === 'MEDIUM' ? '#f57c00' : '#2e7d32';
+            
+            let html = `
+                <div class="modal-header" style="background-color: #f5f5f5; border-bottom: 2px solid ${priorityColor};">
+                    <div style="width: 100%;">
+                        <h5 class="modal-title">🤖 ${suggestions.passenger_name}</h5>
+                        <div style="margin-top: 8px; font-size: 0.85rem;">
+                            <span class="badge" style="background-color: ${priorityColor}; font-size: 0.75rem;">⚠️ ${suggestions.priority}</span>
+                            ${suggestions.next_destination ? `<span class="badge bg-info ms-2" style="font-size: 0.75rem;">✈️ → ${suggestions.next_destination}</span>` : ''}
+                            ${suggestions.connection_assistance?.connection_risk ? `<span class="badge ms-2" style="background-color: ${connectionRiskColor}; font-size: 0.75rem;">🔗 Connection: ${suggestions.connection_assistance.connection_risk}</span>` : ''}
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="mb-3" style="padding: 10px; background-color: #f9f9f9; border-radius: 5px;">
+                        <strong>PNR:</strong> ${suggestions.pnr} | 
+                        <strong>Flight:</strong> ${suggestions.flight_number} | 
+                        <strong>Class:</strong> ${suggestions.ticket_class} |
+                        <strong>Delay:</strong> ${suggestions.delay_minutes} mins
+                        ${suggestions.summary ? `<br><small style="color: #666;">${suggestions.summary.recommended_action}</small>` : ''}
+                    </div>
+            `;
+            
+            // Display completed actions
+            if (suggestions.completed_actions && suggestions.completed_actions.length > 0) {
+                html += `
+                    <div class="alert alert-success mb-3" style="border-left: 4px solid #28a745;">
+                        <h6 style="color: #155724; margin-bottom: 10px;">✅ Completed Actions</h6>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            ${suggestions.completed_actions.map(action => `
+                                <span class="badge bg-success" style="font-size: 0.85rem; padding: 6px 12px;">
+                                    ${action.icon} ${action.label}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `
+            `;
+            
+            // AI-Generated Personalized Recommendation (if available)
+            if (suggestions.ai_personalized_note) {
+                html += `
+                    <div class="alert alert-info mb-3" style="border-left: 4px solid #0288d1; background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);">
+                        <div style="display: flex; align-items: start; gap: 10px;">
+                            <div style="font-size: 1.5rem;">🤖</div>
+                            <div style="flex: 1;">
+                                <strong style="color: #01579b;">AI-Generated Personalized Recommendation</strong>
+                                <p style="margin-top: 8px; margin-bottom: 0; color: #01579b; line-height: 1.6;">
+                                    ${suggestions.ai_personalized_note}
+                                </p>
+                                <small style="color: #0288d1; font-style: italic;">Generated by Ollama AI for this specific passenger</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `
+            `;
+            
+            // Communications
+            if (suggestions.communications) {
+                html += `
+                    <div class="suggestion-section mb-3" style="border-left: 4px solid #007bff; padding: 12px; background-color: #f8f9fa;">
+                        <h6 style="color: #007bff; margin-bottom: 10px;">📢 Communications</h6>
+                        <small>${suggestions.communications.message}</small>
+                        <div class="mt-2">
+                `;
+                if (suggestions.communications.channels) {
+                    suggestions.communications.channels.forEach(channel => {
+                        html += `
+                            <div class="alert alert-light" style="margin-bottom: 8px;">
+                                <strong>${channel.type}</strong> - Priority: <span class="badge bg-danger">${channel.priority}</span><br>
+                                <small>"${channel.template}"</small><br>
+                                <button class="btn btn-sm btn-primary mt-2" data-action="send-${channel.type.toLowerCase()}" onclick="approveAction('communication', '${suggestions.passenger_id}', '${channel.type}')">
+                                    ✓ Send ${channel.type}
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+                html += `</div></div>`;
+            }
+            
+            // Rebooking
+            if (suggestions.rebooking_options && suggestions.rebooking_options.length > 0) {
+                const rebookingEligible = isEligibleFor('rebooking');
+                const disabledStyle = !rebookingEligible ? 'opacity: 0.6; pointer-events: none;' : '';
+                const eligibilityBadge = !rebookingEligible ? '<span class="badge bg-secondary ms-2" style="font-size: 0.7rem;">⛔ NOT ELIGIBLE</span>' : '';
+                
+                html += `
+                    <div class="suggestion-section mb-3" style="border-left: 4px solid ${rebookingEligible ? '#1971c2' : '#ccc'}; padding: 12px; background-color: ${rebookingEligible ? '#e7f5ff' : '#f5f5f5'};">
+                        <h6 style="color: ${rebookingEligible ? '#1971c2' : '#999'}; margin-bottom: 10px;">✈️ Rebooking Options ${eligibilityBadge}</h6>
+                        ${!rebookingEligible ? '<div class="alert alert-warning" style="margin-bottom: 10px; font-size: 0.9em;">⚠️ This passenger is not eligible for rebooking based on current policy.</div>' : ''}
+                `;
+                
+                if (rebookingEligible) {
+                    suggestions.rebooking_options.forEach((opt, idx) => {
+                        const depTime = opt.departure ? new Date(opt.departure).toLocaleString() : 'TBD';
+                        const arrTime = opt.arrival ? new Date(opt.arrival).toLocaleString() : 'TBD';
+                        const route = opt.destination ? `${opt.origin || '?'} → ${opt.destination}` : 'Route TBD';
+                        const isConnectionFriendly = opt.connection_friendly;
+                        const borderStyle = isConnectionFriendly ? '2px solid #2e7d32' : '1px solid #cce5ff';
+                        const bgColor = isConnectionFriendly ? '#e8f5e9' : '#ffffff';
+                        
+                        html += `
+                            <div class="alert alert-light" style="margin-bottom: 8px; border: ${borderStyle}; background-color: ${bgColor};">
+                                <div style="margin-bottom: 8px;">
+                                    <strong>Option ${idx + 1}:</strong> <span style="background-color: #e7f5ff; padding: 2px 6px; border-radius: 3px; font-weight: bold;">${opt.flight_number}</span>
+                                    <span style="margin-left: 10px; color: #666;">${route}</span>
+                                    ${isConnectionFriendly ? '<span class="badge bg-success ms-2" style="font-size: 0.7rem;">✓ MATCHES YOUR CONNECTION</span>' : ''}
+                                    ${opt.cabin_upgrade ? '<span class="badge bg-warning ms-2" style="font-size: 0.7rem;">⬆️ Upgrade Available</span>' : ''}
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9em; margin-bottom: 8px;">
+                                    <div>
+                                        <strong>Departs:</strong><br>
+                                        <small>${depTime}</small>
+                                    </div>
+                                    <div>
+                                        <strong>Arrives:</strong><br>
+                                        <small>${arrTime}</small>
+                                    </div>
+                                    <div>
+                                        <strong>Class:</strong><br>
+                                        <small>${opt.cabin_class || 'Economy'}</small>
+                                    </div>
+                                    <div>
+                                        <strong>Seats Available:</strong><br>
+                                        <small>${opt.seats_available || 'N/A'}</small>
+                                    </div>
+                                </div>
+                                ${opt.aircraft_type ? `<small style="color: #666;">Aircraft: ${opt.aircraft_type}</small><br>` : ''}
+                                ${isConnectionFriendly ? `<div style="background-color: #c8e6c9; padding: 6px; border-radius: 4px; margin-top: 8px; font-size: 0.85em;"><strong>✓ Recommended:</strong> This flight connects to your final destination ${opt.destination}</div>` : ''}
+                                <button class="btn btn-sm ${isConnectionFriendly ? 'btn-success' : 'btn-primary'} mt-2" data-action="rebooking" onclick="approveAction('rebook', '${suggestions.passenger_id}', '${opt.flight_number}')">
+                                    ✓ ${isConnectionFriendly ? 'Book Priority Connection' : 'Approve Rebooking'}
+                                </button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += `<p style="color: #999; font-style: italic;">No rebooking options available for this passenger.</p>`;
+                }
+                html += `</div>`;
+            }
+            
+            // Vouchers
+            if (suggestions.vouchers && suggestions.vouchers.length > 0) {
+                // Check eligibility for each voucher type
+                const mealEligible = isEligibleFor('meal');
+                const hotelEligible = isEligibleFor('hotel');
+                const transportEligible = isEligibleFor('transport');
+                
+                html += `
+                    <div class="suggestion-section mb-3" style="border-left: 4px solid #ffc107; padding: 12px; background-color: #fff3cd;">
+                        <h6 style="color: #856404; margin-bottom: 10px;">🎟️ Vouchers</h6>
+                `;
+                suggestions.vouchers.forEach(voucher => {
+                    const voucherType = voucher.type.toLowerCase();
+                    let isEligible = true;
+                    
+                    if (voucherType === 'meal') isEligible = mealEligible;
+                    else if (voucherType === 'hotel') isEligible = hotelEligible;
+                    else if (voucherType === 'transportation') isEligible = transportEligible;
+                    
+                    const disabledAttr = !isEligible ? 'disabled' : '';
+                    const buttonClass = isEligible ? 'btn-warning' : 'btn-secondary';
+                    const eligibilityIndicator = !isEligible ? ' ⛔ NOT ELIGIBLE' : '';
+                    
+                    html += `
+                        <div class="alert alert-light" style="margin-bottom: 8px; ${!isEligible ? 'opacity: 0.6;' : ''}">
+                            <strong>${voucher.type.toUpperCase()}${eligibilityIndicator}</strong>: $${voucher.amount} x ${voucher.quantity} = <strong>$${voucher.total}</strong><br>
+                            <button class="btn btn-sm ${buttonClass} mt-2" data-action="issue-${voucherType}" onclick="approveAction('voucher', '${suggestions.passenger_id}', '${voucher.type}', ${voucher.total})" ${disabledAttr}>
+                                ✓ Issue ${voucher.type.charAt(0).toUpperCase() + voucher.type.slice(1)} Voucher
+                            </button>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+            
+            // Compensation
+            if (suggestions.compensation && suggestions.compensation.length > 0) {
+                const compensationEligible = isEligibleFor('compensation');
+                const disabledStyle = !compensationEligible ? 'opacity: 0.6;' : '';
+                const eligibilityBadge = !compensationEligible ? '<span class="badge bg-secondary ms-2" style="font-size: 0.7rem;">⛔ NOT ELIGIBLE</span>' : '';
+                
+                html += `
+                    <div class="suggestion-section mb-3" style="border-left: 4px solid ${compensationEligible ? '#28a745' : '#ccc'}; padding: 12px; background-color: ${compensationEligible ? '#d3e5d3' : '#f5f5f5'};">
+                        <h6 style="color: ${compensationEligible ? '#155724' : '#999'}; margin-bottom: 10px;">💰 Compensation ${eligibilityBadge}</h6>
+                        ${!compensationEligible ? '<div class="alert alert-warning" style="margin-bottom: 10px; font-size: 0.9em;">⚠️ This passenger is not eligible for compensation based on current policy.</div>' : ''}
+                `;
+                if (compensationEligible) {
+                    suggestions.compensation.forEach(comp => {
+                        html += `
+                            <div class="alert alert-light" style="margin-bottom: 8px;">
+                                <strong>${comp.type}</strong>: <span class="badge bg-success">$${comp.amount}</span><br>
+                                <small>${comp.reason} (${comp.regulation})</small><br>
+                                <button class="btn btn-sm btn-success mt-2" data-action="approve-compensation" onclick="approveAction('compensation', '${suggestions.passenger_id}', '${comp.type}', ${comp.amount})">
+                                    ✓ Approve $${comp.amount}
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+                html += `</div>`;
+            }
+            
+            // Connections
+            if (suggestions.connection_assistance && suggestions.connection_assistance.has_connection) {
+                const connectionEligible = isEligibleFor('transport');
+                const riskColor = suggestions.connection_assistance.connection_risk === 'HIGH' ? '#d32f2f' :
+                                  suggestions.connection_assistance.connection_risk === 'MEDIUM' ? '#f57c00' : '#2e7d32';
+                const riskBg = suggestions.connection_assistance.connection_risk === 'HIGH' ? '#ffebee' :
+                               suggestions.connection_assistance.connection_risk === 'MEDIUM' ? '#fff3e0' : '#e8f5e9';
+                const disabledAttr = !connectionEligible ? 'disabled' : '';
+                
+                html += `
+                    <div class="suggestion-section mb-3" style="border-left: 4px solid ${connectionEligible ? riskColor : '#ccc'}; padding: 12px; background-color: ${connectionEligible ? riskBg : '#f5f5f5'};">
+                        <h6 style="color: ${connectionEligible ? riskColor : '#999'}; margin-bottom: 10px;">
+                            🔗 Connection Assistance 
+                            <span class="badge" style="background-color: ${riskColor}; font-size: 0.7rem; margin-left: 8px;">Risk: ${suggestions.connection_assistance.connection_risk}</span>
+                            ${!connectionEligible ? '<span class="badge bg-secondary ms-2" style="font-size: 0.7rem;">⛔ NOT ELIGIBLE</span>' : ''}
+                        </h6>
+                        ${!connectionEligible ? '<div class="alert alert-warning" style="margin-bottom: 10px; font-size: 0.9em;">⚠️ This passenger is not eligible for connection assistance based on current policy.</div>' : ''}
+                        <div style="background-color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                            <div><strong>Next destination:</strong> ${suggestions.connection_assistance.next_destination}</div>
+                            <div style="margin-top: 5px;"><strong>Priority action:</strong> ${suggestions.connection_assistance.priority_action}</div>
+                            ${suggestions.connection_assistance.suggested_buffer ? `<div style="margin-top: 5px;"><small style="color: #666;">💡 ${suggestions.connection_assistance.suggested_buffer}</small></div>` : ''}
+                        </div>
+                        <button class="btn btn-sm" style="background-color: ${riskColor}; color: white; ${!connectionEligible ? 'opacity: 0.6;' : ''}" data-action="connection-assistance" onclick="approveAction('connection', '${suggestions.passenger_id}')" ${disabledAttr}>
+                            ✓ Activate Priority Connection Protocol
+                        </button>
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+            
+            document.getElementById('passengerSuggestionsModalContent').innerHTML = html;
+        }
+
+        // Store current action context
+        let currentActionContext = {};
+
+        // Hotel Inventory Data
+        const hotelInventory = [
+            {
+                id: 'H001',
+                name: 'Comfort Inn Downtown',
+                category: 'Standard',
+                rooms: [
+                    { type: 'Single', price: 89, beds: 1, sqft: 250 },
+                    { type: 'Double', price: 109, beds: 2, sqft: 280 },
+                    { type: 'Twin', price: 119, beds: 2, sqft: 300 }
+                ]
+            },
+            {
+                id: 'H002',
+                name: 'Premier Business Hotel',
+                category: 'Comfort',
+                rooms: [
+                    { type: 'Single', price: 129, beds: 1, sqft: 280 },
+                    { type: 'Double', price: 149, beds: 2, sqft: 320 },
+                    { type: 'Suite', price: 189, beds: 2, sqft: 450 }
+                ]
+            },
+            {
+                id: 'H003',
+                name: 'Luxury Suites Express',
+                category: 'Premium',
+                rooms: [
+                    { type: 'Double Deluxe', price: 189, beds: 2, sqft: 350 },
+                    { type: 'Suite', price: 249, beds: 2, sqft: 550 },
+                    { type: 'Executive Suite', price: 349, beds: 2, sqft: 700 }
+                ]
+            },
+            {
+                id: 'H004',
+                name: 'Grand Luxury Resort',
+                category: 'Luxury',
+                rooms: [
+                    { type: 'Premium Suite', price: 299, beds: 2, sqft: 600 },
+                    { type: 'Royal Suite', price: 399, beds: 2, sqft: 800 },
+                    { type: 'Presidential Suite', price: 599, beds: 2, sqft: 1200 }
+                ]
+            }
+        ];
+
+        let selectedHotel = null;
+        let selectedRoom = null;
+
+        async function approveAction(actionType, passengerId, actionValue, amount) {
+            try {
+                // Fetch passenger details
+                const passengersResponse = await fetch(`${API_BASE}/flights`);
+                const flightsData = await passengersResponse.json();
+                
+                // Find passenger from suggestions (stored in context)
+                const passenger = currentActionContext.passenger;
+                
+                if (!passenger) {
+                    showAlert('Error: Passenger context not found', 'danger');
+                    return;
+                }
+                
+                // Open appropriate dialog based on action type
+                switch(actionType) {
+                    case 'voucher':
+                        if (actionValue === 'meal') {
+                            openMealCouponDialog(passenger, actionValue, amount);
+                        } else if (actionValue === 'hotel') {
+                            openHotelVoucherDialog(passenger, actionValue, amount);
+                        } else if (actionValue === 'transportation') {
+                            openMealCouponDialog(passenger, 'transportation', amount);
+                        }
+                        break;
+                    case 'compensation':
+                        openCompensationDialog(passenger, actionValue, amount);
+                        break;
+                    case 'rebook':
+                        openRebookingDialog(passenger, actionValue);
+                        break;
+                    case 'communication':
+                        openMessageDialog(passenger, actionValue);
+                        break;
+                    case 'connection':
+                        openMessageDialog(passenger, 'Connection Priority Alert');
+                        break;
+                    default:
+                        showAlert(`Action type '${actionType}' not implemented`, 'warning');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'danger');
+            }
+        }
+
+        function openMealCouponDialog(passenger, voucherType, amount) {
+            document.getElementById('mealCoupon_name').textContent = passenger.passenger_name;
+            document.getElementById('mealCoupon_pnr').textContent = passenger.pnr;
+            document.getElementById('mealCoupon_flight').textContent = passenger.flight_number;
+            document.getElementById('mealCoupon_amount').value = amount || 25;
+            document.getElementById('mealCoupon_quantity').value = 1;
+            document.getElementById('mealCoupon_notes').value = `${voucherType.toUpperCase()} voucher for flight disruption`;
+            
+            // Store context
+            currentActionContext.mealCoupon = {
+                passenger_id: passenger.passenger_id,
+                passenger_name: passenger.passenger_name,
+                pnr: passenger.pnr,
+                email: passenger.email,
+                flight_number: passenger.flight_number,
+                voucherType: voucherType
+            };
+            
+            updateMealCouponTotal();
+            new bootstrap.Modal(document.getElementById('mealCouponDialog')).show();
+        }
+
+        function updateMealCouponTotal() {
+            const amount = parseFloat(document.getElementById('mealCoupon_amount').value) || 0;
+            const qty = parseInt(document.getElementById('mealCoupon_quantity').value) || 1;
+            document.getElementById('mealCoupon_total').textContent = (amount * qty).toFixed(2);
+        }
+
+        async function submitMealCoupon() {
+            try {
+                const amount = parseFloat(document.getElementById('mealCoupon_amount').value);
+                const qty = parseInt(document.getElementById('mealCoupon_quantity').value);
+                const notes = document.getElementById('mealCoupon_notes').value;
+                const ctx = currentActionContext.mealCoupon;
+                
+                const response = await fetch(`${API_BASE}/actions/save-meal-coupon`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        passenger_id: ctx.passenger_id,
+                        passenger_name: ctx.passenger_name,
+                        pnr: ctx.pnr,
+                        email: ctx.email,
+                        flight_number: ctx.flight_number,
+                        amount: amount,
+                        quantity: qty,
+                        total_value: amount * qty,
+                        notes: notes
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showAlert(`✅ Meal coupon issued! Action ID: ${result.action_id}`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('mealCouponDialog')).hide();
+                    hideActionButton('meal');
+                    trackCompletedAction(ctx.passenger_id, 'meal', `Meal voucher $${amount}`);
+                } else {
+                    showAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (e) {
+                showAlert('Error saving meal coupon: ' + e.message, 'danger');
+            }
+        }
+
+        function openHotelVoucherDialog(passenger, voucherType, amount) {
+            document.getElementById('hotelVoucher_name').textContent = passenger.passenger_name;
+            document.getElementById('hotelVoucher_pnr').textContent = passenger.pnr;
+            document.getElementById('hotelVoucher_flight').textContent = passenger.flight_number;
+            document.getElementById('hotelVoucher_nights').value = 1;
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('hotelVoucher_checkin').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('hotelVoucher_notes').value = '';
+            
+            // Reset hotel/room selection
+            selectedHotel = null;
+            selectedRoom = null;
+            document.getElementById('roomDetailsSection').style.display = 'none';
+            
+            currentActionContext.hotelVoucher = {
+                passenger_id: passenger.passenger_id,
+                passenger_name: passenger.passenger_name,
+                pnr: passenger.pnr,
+                email: passenger.email,
+                flight_number: passenger.flight_number
+            };
+            
+            // Populate hotel list
+            populateHotelList(passenger.ticket_class);
+            new bootstrap.Modal(document.getElementById('hotelVoucherDialog')).show();
+        }
+
+        function populateHotelList(ticketClass) {
+            const hotelListDiv = document.getElementById('hotelList');
+            hotelListDiv.innerHTML = '';
+            
+            hotelInventory.forEach(hotel => {
+                const isPreferred = (ticketClass === 'Business' && (hotel.category === 'Premium' || hotel.category === 'Luxury')) ||
+                                   (ticketClass === 'Economy' && hotel.category === 'Standard');
+                
+                const hotelCard = document.createElement('div');
+                hotelCard.style.cssText = 'padding: 10px; border-bottom: 1px solid #ddd; cursor: pointer; transition: background-color 0.2s;';
+                hotelCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
+                        <div>
+                            <strong>${hotel.name}</strong>
+                            <span style="font-size: 0.8em; color: #666; margin-left: 10px;">📍 ${hotel.category}</span>
+                            ${isPreferred ? '<span style="font-size: 0.8em; background-color: #fff3cd; padding: 2px 6px; border-radius: 3px; margin-left: 5px;">✨ Recommended</span>' : ''}
+                        </div>
+                    </div>
+                `;
+                
+                hotelCard.onmouseover = () => hotelCard.style.backgroundColor = '#f0f0f0';
+                hotelCard.onmouseout = () => hotelCard.style.backgroundColor = 'white';
+                
+                hotelCard.onclick = () => selectHotel(hotel);
+                hotelListDiv.appendChild(hotelCard);
+            });
+        }
+
+        function selectHotel(hotel) {
+            selectedHotel = hotel;
+            selectedRoom = null;
+            
+            // Update hotel selection styling
+            Array.from(document.getElementById('hotelList').children).forEach(el => {
+                el.style.backgroundColor = el.textContent.includes(hotel.name) ? '#e3f2fd' : 'white';
+            });
+            
+            // Populate room list
+            const roomListDiv = document.getElementById('roomList');
+            roomListDiv.innerHTML = '';
+            
+            hotel.rooms.forEach((room, index) => {
+                const roomCard = document.createElement('div');
+                roomCard.style.cssText = 'padding: 10px; border-bottom: 1px solid #ddd; cursor: pointer; transition: background-color 0.2s;';
+                roomCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${room.type}</strong>
+                            <small style="color: #666; display: block;">🛏️ ${room.beds} bed(s) | 📐 ${room.sqft} sqft</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.2em; font-weight: bold; color: #1976d2;">$${room.price}</div>
+                            <small style="color: #666;">per night</small>
+                        </div>
+                    </div>
+                `;
+                
+                roomCard.onmouseover = () => roomCard.style.backgroundColor = '#f0f0f0';
+                roomCard.onmouseout = () => roomCard.style.backgroundColor = 'white';
+                
+                roomCard.onclick = () => selectRoom(room);
+                roomListDiv.appendChild(roomCard);
+            });
+        }
+
+        function selectRoom(room) {
+            selectedRoom = room;
+            
+            // Show room details
+            document.getElementById('selectedRoomDisplay').textContent = `${room.type} (${room.beds} bed, ${room.sqft} sqft)`;
+            document.getElementById('selectedRoomPrice').textContent = room.price;
+            document.getElementById('selectedRoomType').textContent = room.type;
+            document.getElementById('roomDetailsSection').style.display = 'block';
+            
+            // Update room selection styling
+            Array.from(document.getElementById('roomList').children).forEach((el, idx) => {
+                if (selectedHotel && selectedHotel.rooms[idx] === room) {
+                    el.style.backgroundColor = '#e3f2fd';
+                } else {
+                    el.style.backgroundColor = 'white';
+                }
+            });
+            
+            updateHotelVoucherTotal();
+        }
+
+        function updateHotelVoucherTotal() {
+            if (!selectedRoom) {
+                document.getElementById('hotelVoucher_total').textContent = '0';
+                document.getElementById('hotelVoucher_priceBreakdown').textContent = 'Select a room';
+                return;
+            }
+            
+            const nights = parseInt(document.getElementById('hotelVoucher_nights').value) || 1;
+            const roomPrice = selectedRoom.price;
+            const total = roomPrice * nights;
+            
+            document.getElementById('hotelVoucher_total').textContent = total.toFixed(2);
+            document.getElementById('hotelVoucher_priceBreakdown').textContent = `${nights} night${nights > 1 ? 's' : ''} × $${roomPrice}/night`;
+        }
+
+        async function submitHotelVoucher() {
+            if (!selectedHotel || !selectedRoom) {
+                showAlert('Please select a hotel and room', 'warning');
+                return;
+            }
+            
+            try {
+                const nights = parseInt(document.getElementById('hotelVoucher_nights').value);
+                const checkin = document.getElementById('hotelVoucher_checkin').value;
+                const notes = document.getElementById('hotelVoucher_notes').value;
+                const ctx = currentActionContext.hotelVoucher;
+                const totalCost = selectedRoom.price * nights;
+                
+                const response = await fetch(`${API_BASE}/actions/save-hotel-voucher`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        passenger_id: ctx.passenger_id,
+                        passenger_name: ctx.passenger_name,
+                        pnr: ctx.pnr,
+                        email: ctx.email,
+                        flight_number: ctx.flight_number,
+                        hotel_name: selectedHotel.name,
+                        hotel_category: selectedHotel.category,
+                        room_type: selectedRoom.type,
+                        room_price: selectedRoom.price,
+                        check_in_date: checkin,
+                        nights: nights,
+                        total_value: totalCost,
+                        special_requests: notes
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showAlert(`✅ Hotel booking confirmed! Action ID: ${result.action_id}`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('hotelVoucherDialog')).hide();
+                    hideActionButton('hotel');
+                    trackCompletedAction(ctx.passenger_id, 'hotel', `${selectedHotel.name} - ${selectedRoom.type}`);
+                } else {
+                    showAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (e) {
+                showAlert('Error saving hotel voucher: ' + e.message, 'danger');
+            }
+        }
+
+        function hideActionButton(actionType) {
+            // Find and hide the action button based on type
+            const actionMap = {
+                'meal': 'issue-meal',
+                'hotel': 'issue-hotel',
+                'transportation': 'issue-transport',
+                'compensation': 'approve-compensation',
+                'rebooking': 'rebooking',
+                'message': 'send-',  // Will match send-email, send-sms, etc.
+                'communication': 'send-'
+            };
+            
+            // Find buttons with matching data-action
+            const matcher = actionMap[actionType] || actionType;
+            const buttons = document.querySelectorAll(`button[data-action*="${matcher}"]`);
+            
+            buttons.forEach(btn => {
+                btn.style.transition = 'opacity 0.3s ease-out';
+                btn.style.opacity = '0';
+                setTimeout(() => {
+                    btn.style.display = 'none';
+                }, 300);
+            });
+        }
+        
+        function trackCompletedAction(passengerId, actionType, actionDetails) {
+            // Track completed actions per passenger
+            if (!passengerActions[passengerId]) {
+                passengerActions[passengerId] = [];
+            }
+            
+            const actionIcons = {
+                'meal': '🍽️',
+                'hotel': '🏨',
+                'compensation': '💰',
+                'rebooking': '✈️',
+                'message': '📧'
+            };
+            
+            passengerActions[passengerId].push({
+                type: actionType,
+                icon: actionIcons[actionType] || '✅',
+                label: actionDetails,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Refresh passenger list to show new badges
+            if (currentFlightId) {
+                fetchPassengers(currentFlightId);
+            }
+            
+            // Refresh actioned passengers list in Manager Summary
+            renderActionedPassengers();
+        }
+
+        function openCompensationDialog(passenger, compensationType, amount) {
+            document.getElementById('compensation_name').textContent = passenger.passenger_name;
+            document.getElementById('compensation_pnr').textContent = passenger.pnr;
+            document.getElementById('compensation_flight').textContent = passenger.flight_number;
+            document.getElementById('compensation_amount').value = amount || 125;
+            document.getElementById('compensation_reason').value = `Flight delayed ${passenger.delay_minutes} minutes`;
+            document.getElementById('compensation_regulation').value = 'EU261';
+            document.getElementById('compensation_method').value = 'Cash';
+            
+            currentActionContext.compensation = {
+                passenger_id: passenger.passenger_id,
+                passenger_name: passenger.passenger_name,
+                pnr: passenger.pnr,
+                email: passenger.email,
+                flight_number: passenger.flight_number,
+                delay_minutes: passenger.delay_minutes
+            };
+            
+            new bootstrap.Modal(document.getElementById('compensationDialog')).show();
+        }
+
+        async function submitCompensation() {
+            try {
+                const amount = parseFloat(document.getElementById('compensation_amount').value);
+                const reason = document.getElementById('compensation_reason').value;
+                const regulation = document.getElementById('compensation_regulation').value;
+                const method = document.getElementById('compensation_method').value;
+                const notes = document.getElementById('compensation_notes').value;
+                const ctx = currentActionContext.compensation;
+                
+                const response = await fetch(`${API_BASE}/actions/save-compensation`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        passenger_id: ctx.passenger_id,
+                        passenger_name: ctx.passenger_name,
+                        pnr: ctx.pnr,
+                        email: ctx.email,
+                        flight_number: ctx.flight_number,
+                        amount: amount,
+                        reason: reason,
+                        regulation: regulation,
+                        delay_minutes: ctx.delay_minutes,
+                        payment_method: method,
+                        notes: notes
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showAlert(`✅ Compensation approved! Action ID: ${result.action_id}`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('compensationDialog')).hide();
+                    hideActionButton('compensation');
+                    trackCompletedAction(ctx.passenger_id, 'compensation', `$${amount} compensation`);
+                } else {
+                    showAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (e) {
+                showAlert('Error saving compensation: ' + e.message, 'danger');
+            }
+        }
+
+        function openRebookingDialog(passenger, newFlight) {
+            document.getElementById('rebooking_name').textContent = passenger.passenger_name;
+            document.getElementById('rebooking_pnr').textContent = passenger.pnr;
+            document.getElementById('rebooking_original').textContent = passenger.flight_number;
+            document.getElementById('rebooking_new_flight').value = newFlight || '';
+            document.getElementById('rebooking_class').value = passenger.ticket_class || 'Economy';
+            document.getElementById('rebooking_seat').value = '';
+            document.getElementById('rebooking_upgrade').checked = false;
+            document.getElementById('rebooking_notes').value = `Priority rebooking for disrupted flight ${passenger.flight_number}`;
+            
+            currentActionContext.rebooking = {
+                passenger_id: passenger.passenger_id,
+                passenger_name: passenger.passenger_name,
+                pnr: passenger.pnr,
+                email: passenger.email,
+                flight_number: passenger.flight_number,
+                new_flight: newFlight
+            };
+            
+            new bootstrap.Modal(document.getElementById('rebookingDialog')).show();
+        }
+
+        async function submitRebooking() {
+            try {
+                const seat = document.getElementById('rebooking_seat').value;
+                const classVal = document.getElementById('rebooking_class').value;
+                const upgrade = document.getElementById('rebooking_upgrade').checked;
+                const notes = document.getElementById('rebooking_notes').value;
+                const ctx = currentActionContext.rebooking;
+                
+                if (!seat) {
+                    showAlert('Error: Please enter seat number', 'warning');
+                    return;
+                }
+                
+                const response = await fetch(`${API_BASE}/actions/save-rebooking`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        passenger_id: ctx.passenger_id,
+                        passenger_name: ctx.passenger_name,
+                        pnr: ctx.pnr,
+                        email: ctx.email,
+                        original_flight: ctx.flight_number,
+                        new_flight: ctx.new_flight,
+                        seat_number: seat,
+                        cabin_class: classVal,
+                        cabin_upgrade: upgrade,
+                        notes: notes
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showAlert(`✅ Rebooking confirmed! Action ID: ${result.action_id}`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('rebookingDialog')).hide();
+                    hideActionButton('rebooking');
+                    trackCompletedAction(ctx.passenger_id, 'rebooking', `Rebooked to ${ctx.new_flight}`);
+                } else {
+                    showAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (e) {
+                showAlert('Error saving rebooking: ' + e.message, 'danger');
+            }
+        }
+
+        function openMessageDialog(passenger, messageType) {
+            document.getElementById('message_name').textContent = passenger.passenger_name;
+            document.getElementById('message_email').textContent = passenger.email;
+            document.getElementById('message_flight').textContent = passenger.flight_number;
+            document.getElementById('message_type').value = messageType === 'Email' ? 'Email' : messageType === 'SMS' ? 'SMS' : 'Email';
+            document.getElementById('message_subject').value = `Flight ${passenger.flight_number} Update`;
+            document.getElementById('message_body').value = `Dear ${passenger.passenger_name},\n\nWe sincerely apologize for the disruption to your flight ${passenger.flight_number}. We are working to provide you with the best possible solution.\n\nBest regards,\nAirline Disruption Management Team`;
+            
+            currentActionContext.message = {
+                passenger_id: passenger.passenger_id,
+                passenger_name: passenger.passenger_name,
+                pnr: passenger.pnr,
+                email: passenger.email,
+                flight_number: passenger.flight_number
+            };
+            
+            new bootstrap.Modal(document.getElementById('messageDialog')).show();
+        }
+
+        async function submitMessage() {
+            try {
+                const type = document.getElementById('message_type').value;
+                const subject = document.getElementById('message_subject').value;
+                const body = document.getElementById('message_body').value;
+                const ctx = currentActionContext.message;
+                
+                if (!body.trim()) {
+                    showAlert('Error: Message cannot be empty', 'warning');
+                    return;
+                }
+                
+                const response = await fetch(`${API_BASE}/actions/save-message`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        passenger_id: ctx.passenger_id,
+                        passenger_name: ctx.passenger_name,
+                        pnr: ctx.pnr,
+                        email: ctx.email,
+                        flight_number: ctx.flight_number,
+                        message_type: type,
+                        recipient: ctx.email,
+                        subject: subject,
+                        message_body: body
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showAlert(`✅ Message sent! Action ID: ${result.action_id}`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('messageDialog')).hide();
+                    hideActionButton('message');
+                    trackCompletedAction(ctx.passenger_id, 'message', `${type} sent`);
+                } else {
+                    showAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (e) {
+                showAlert('Error sending message: ' + e.message, 'danger');
+            }
+        }
+
+        async function fetchRecommendation(disruptionId) {
+            try {
+                const response = await fetch(`${API_BASE}/disruptions/${disruptionId}/recommendations`);
+                const data = await response.json();
+                renderRecommendationsModal(data);
+                new bootstrap.Modal(document.getElementById('recommendationsModal')).show();
+            } catch (e) {
+                // Recommendations not found, fetch all and display
+                await fetchDisruptions();
+                const rec = allRecommendations.find(r => r.disruption_id === disruptionId);
+                if (rec) renderRecommendationsModal(rec);
+            }
+        }
+
+        async function applyPlan(passengerId, action) {
+            try {
+                const response = await fetch(`${API_BASE}/actions/apply-plan`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ passenger_id: passengerId, action: action })
+                });
+                
+                const data = await response.json();
+                // Track action in passenger_actions
+                trackPassengerAction(passengerId, action);
+                showAlert(`✅ Applied: ${action} for passenger ${passengerId}`, 'success');
+            } catch (e) {
+                showAlert('Error applying plan: ' + e.message, 'danger');
+            }
+        }
+
+        function showRebookOptions(passengerId, currentFlight, nextDestination) {
+            // Get the disrupted flight details to find origin and destination
+            const disruptedFlight = allFlights.find(f => f.flight_number === currentFlight);
+            
+            if (!disruptedFlight) {
+                showAlert('Flight information not found', 'warning');
+                return;
+            }
+
+            // If passenger has a next destination, fetch real options from backend
+            // Otherwise generate generic options
+            if (nextDestination && nextDestination !== 'null' && nextDestination !== '') {
+                fetchAndShowAvailableFlights(passengerId, nextDestination, currentFlight);
+            } else {
+                // No next destination - showing generic rebooking
+                const availableFlights = generateAvailableFlights(disruptedFlight);
+                displayRebookingOptions(passengerId, currentFlight, availableFlights);
+            }
+        }
+        
+        async function fetchAndShowAvailableFlights(passengerId, nextDestination, currentFlight) {
+            try {
+                const response = await fetch(`${API_BASE}/available-flights/${nextDestination}`);
+                const data = await response.json();
+                
+                if (data.flights && data.flights.length > 0) {
+                    displayRebookingOptions(passengerId, currentFlight, data.flights, nextDestination);
+                } else {
+                    showAlert(`No flights found to ${nextDestination}. Showing alternative options...`, 'warning');
+                    const disruptedFlight = allFlights.find(f => f.flight_number === currentFlight);
+                    const availableFlights = generateAvailableFlights(disruptedFlight);
+                    displayRebookingOptions(passengerId, currentFlight, availableFlights);
+                }
+            } catch (e) {
+                console.error('Error fetching available flights:', e);
+                const disruptedFlight = allFlights.find(f => f.flight_number === currentFlight);
+                const availableFlights = generateAvailableFlights(disruptedFlight);
+                displayRebookingOptions(passengerId, currentFlight, availableFlights);
+            }
+        }
+        
+        function displayRebookingOptions(passengerId, currentFlight, flights, nextDestination = null) {
+            let flightOptions = flights.map((f, idx) => {
+                const destination = nextDestination || f.destination || 'N/A';
+                const isCodeshare = f.codeshare || f.airline_name?.includes('Codeshare');
+                return `
+                    <div class="card mb-3 p-3" style="border-left: 4px solid ${isCodeshare ? '#0d6efd' : '#198754'}; cursor:pointer;" 
+                         onclick="selectRebookFlight('${passengerId}', '${f.flight_number}', ${f.price})">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <h6 class="mb-1">${f.flight_number}</h6>
+                                <small class="text-muted">${f.airline_name || 'Airline'}</small>
+                            </div>
+                            <div class="col-md-5">
+                                <small><strong>${f.origin || 'AUH'}</strong> → <strong>${destination}</strong></small><br>
+                                <small>Departure: <strong>${f.departure_time}</strong></small><br>
+                                <small>Duration: ${f.duration} | Cabin: <strong>${f.cabin}</strong></small>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                ${isCodeshare ? '<span class="badge bg-info mb-2">Codeshare</span><br>' : ''}
+                                <span class="badge bg-success">${f.available_seats} Seats</span><br>
+                                <small class="text-muted">$${f.price}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            const destinationInfo = nextDestination ? `Route: AUH → ${nextDestination}` : `Rebooking Options`;
+            const html = `
+                <h6 class="mb-3">✈️ Available Rebooking Options for ${currentFlight}</h6>
+                <p class="text-muted"><small>${destinationInfo}</small></p>
+                <div class="mb-3">
+                    <strong>EY Flights</strong> (Green) | <strong>Codeshare</strong> (Blue)
+                </div>
+                ${flightOptions}
+            `;
+            
+            document.getElementById('modal-rebook-options').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('rebookModal')).show();
+        }
+
+        function generateAvailableFlights(disruptedFlight) {
+            // Generate flights based on the disrupted flight's route
+            const origin = disruptedFlight.origin;
+            const destination = disruptedFlight.destination;
+            
+            // Create various rebooking options with different timings, airlines, classes
+            const flights = [
+                // Same day - EY flights
+                {
+                    flight_number: 'EY' + Math.floor(Math.random() * 900 + 100),
+                    airline_name: 'Etihad Airways',
+                    origin: origin,
+                    destination: destination,
+                    departure_time: '14:30',
+                    duration: '9h 45m',
+                    cabin: 'Economy',
+                    available_seats: Math.floor(Math.random() * 80 + 20),
+                    price: 280,
+                    codeshare: false
+                },
+                {
+                    flight_number: 'EY' + Math.floor(Math.random() * 900 + 100),
+                    airline_name: 'Etihad Airways',
+                    origin: origin,
+                    destination: destination,
+                    departure_time: '18:00',
+                    duration: '9h 45m',
+                    cabin: 'Business',
+                    available_seats: Math.floor(Math.random() * 30 + 5),
+                    price: 850,
+                    codeshare: false
+                },
+                // Next day - EY flights
+                {
+                    flight_number: 'EY' + Math.floor(Math.random() * 900 + 100),
+                    airline_name: 'Etihad Airways',
+                    origin: origin,
+                    destination: destination,
+                    departure_time: '08:15',
+                    duration: '9h 45m',
+                    cabin: 'Economy',
+                    available_seats: Math.floor(Math.random() * 120 + 30),
+                    price: 220,
+                    codeshare: false
+                },
+                // Codeshare - British Airways
+                {
+                    flight_number: 'BA' + Math.floor(Math.random() * 900 + 100),
+                    airline_name: 'British Airways (Codeshare with EY)',
+                    origin: origin,
+                    destination: destination,
+                    departure_time: '11:45',
+                    duration: '9h 50m',
+                    cabin: 'Premium Economy',
+                    available_seats: Math.floor(Math.random() * 45 + 10),
+                    price: 550,
+                    codeshare: true
+                },
+                // Codeshare - Lufthansa
+                {
+                    flight_number: 'LH' + Math.floor(Math.random() * 900 + 100),
+                    airline_name: 'Lufthansa (Codeshare with EY)',
+                    origin: origin,
+                    destination: destination,
+                    departure_time: '16:20',
+                    duration: '10h 15m',
+                    cabin: 'Economy',
+                    available_seats: Math.floor(Math.random() * 100 + 20),
+                    price: 250,
+                    codeshare: true
+                },
+                // Codeshare - Air France
+                {
+                    flight_number: 'AF' + Math.floor(Math.random() * 900 + 100),
+                    airline_name: 'Air France (Codeshare with EY)',
+                    origin: origin,
+                    destination: destination,
+                    departure_time: '19:00',
+                    duration: '10h 05m',
+                    cabin: 'Business',
+                    available_seats: Math.floor(Math.random() * 25 + 5),
+                    price: 950,
+                    codeshare: true
+                },
+                // Next day - EY morning flight
+                {
+                    flight_number: 'EY' + Math.floor(Math.random() * 900 + 100),
+                    airline_name: 'Etihad Airways',
+                    origin: origin,
+                    destination: destination,
+                    departure_time: '22:45 (Next Day)',
+                    duration: '9h 45m',
+                    cabin: 'Premium',
+                    available_seats: Math.floor(Math.random() * 60 + 10),
+                    price: 650,
+                    codeshare: false
+                }
+            ];
+            
+            return flights;
+        }
+
+        function selectRebookFlight(passengerId, flightNumber, price) {
+            trackPassengerAction(passengerId, `rebook_${flightNumber}_$${price}`);
+            
+            // Hide rebook button for this passenger
+            const rebookBtns = document.querySelectorAll(`button[onclick*="showRebookOptions('${passengerId}'"]`);
+            rebookBtns.forEach(btn => btn.style.display = 'none');
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('rebookModal'));
+            if (modal) modal.hide();
+            
+            showAlert(`✅ Passenger successfully rebooked on flight ${flightNumber}`, 'success');
+        }
+
+        function trackPassengerAction(passengerId, action) {
+            if (!selectedRecommendations[passengerId]) {
+                selectedRecommendations[passengerId] = [];
+            }
+            selectedRecommendations[passengerId].push({
+                action: action,
+                timestamp: new Date().toISOString(),
+                status: 'completed'
+            });
+            
+            // In production, would save to backend: POST /api/passenger-actions
+            console.log('Tracked action:', passengerId, action);
+        }
+
+        function trackAction(actionData) {
+            // Track Ollama suggestion actions
+            if (!selectedRecommendations['ollama_actions']) {
+                selectedRecommendations['ollama_actions'] = [];
+            }
+            selectedRecommendations['ollama_actions'].push({
+                type: actionData.type,
+                action: actionData.action,
+                flight: actionData.flight,
+                timestamp: actionData.timestamp,
+                status: 'applied'
+            });
+            
+            console.log('Tracked Ollama action:', actionData);
+        }
+
+        async function sendCommunication(flightNumber, passengerCount) {
+            try {
+                showAlert(`📢 Sending initial communication to ${passengerCount} passengers on ${flightNumber}...`, 'info');
+                
+                // Simulate sending communication
+                const message = `
+URGENT: Flight ${flightNumber} - Disruption Update
+
+Dear Passengers,
+
+We are experiencing a disruption on your flight. We are working urgently to resolve this situation.
+
+IMMEDIATE ACTIONS:
+• Meal/refreshment vouchers being issued
+• Hotel accommodation arranged if needed  
+• Rebooking on alternative flights available
+• Compensation will be provided per EU regulations
+
+Our team is ready to assist. Please approach the ground staff at gate or call our hotline.
+
+Ref: ${new Date().getTime()}
+                `;
+                
+                showAlert(`✅ Initial communication sent to ${passengerCount} passengers via email and SMS`, 'success');
+            } catch (e) {
+                showAlert('Error sending communication: ' + e.message, 'danger');
+            }
+        }
+
+        function openMessageComposer(passengerId, passengerName, email) {
+            currentMessagePassenger = { id: passengerId, name: passengerName, email: email };
+            
+            document.getElementById('message-passenger-details').innerHTML = `
+                <strong>To:</strong> ${passengerName} (${email})
+            `;
+            
+            document.getElementById('message-text').value = ``;
+            
+            new bootstrap.Modal(document.getElementById('messageModal')).show();
+        }
+        
+        async function submitPassengerMessage() {
+            if (!currentMessagePassenger) {
+                showAlert('No passenger selected', 'warning');
+                return;
+            }
+            
+            const message = document.getElementById('message-text').value.trim();
+            if (!message) {
+                showAlert('Please enter a message', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/passenger/${currentMessagePassenger.id}/send-message`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert(`✅ Message sent to ${currentMessagePassenger.name}`, 'success');
+                    trackPassengerAction(currentMessagePassenger.id, `message_sent`);
+                    
+                    // Hide message button for this passenger
+                    const messageBtns = document.querySelectorAll(`button[onclick*="sendPassengerComm('${currentMessagePassenger.id}')"]`);
+                    messageBtns.forEach(btn => btn.style.display = 'none');
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('messageModal'));
+                    modal.hide();
+                } else {
+                    showAlert('Error sending message: ' + data.error, 'danger');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'danger');
+            }
+        }
+        
+        async function sendPassengerComm(passengerId) {
+            // Find passenger info to open composer
+            let passenger = null;
+            for (const p of allPassengers || []) {
+                if ((p.id || p.passenger_id) === passengerId) {
+                    passenger = p;
+                    break;
+                }
+            }
+            
+            if (!passenger) {
+                showAlert('Passenger info not found', 'warning');
+                return;
+            }
+            
+            openMessageComposer(passengerId, passenger.full_name || passenger.passenger_name, passenger.email);
+        }
+
+        async function approveExecute() {
+            try {
+                const response = await fetch(`${API_BASE}/actions/approve-execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                showAlert('✅ All recommendations approved and executed!', 'success');
+            } catch (e) {
+                showAlert('Error executing: ' + e.message, 'danger');
+            }
+        }
+
+        function exportReport() {
+            const report = {
+                timestamp: new Date().toISOString(),
+                flights: allFlights,
+                disruptions: allDisruptions,
+                recommendations: allRecommendations
+            };
+            
+            const dataStr = JSON.stringify(report, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `disruption-report-${Date.now()}.json`;
+            a.click();
+            
+            showAlert('✅ Report exported!', 'success');
+        }
+
+        // ========================
+        // Rendering Functions
+        // ========================
+        function renderFlightsList() {
+            const container = document.getElementById('flights-list');
+            const disrupted = allFlights.filter(f => f.is_disrupted);
+            
+            const html = allFlights.map(flight => `
+                <div class="card flight-card ${flight.is_disrupted ? 'disrupted' : ''} mb-3">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h5 class="flight-number">${flight.flight_number}</h5>
+                                <p class="text-muted mb-1">${flight.origin} → ${flight.destination}</p>
+                                <small><strong>Scheduled:</strong> ${formatDateTime(flight.scheduled_departure)}</small>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge ${flight.is_disrupted ? 'badge-disrupted' : 'badge-ontime'}">
+                                    ${flight.status}
+                                </span>
+                                ${flight.is_disrupted ? `
+                                    <div class="mt-2 delay-badge text-danger">${flight.delay_minutes} min delay</div>
+                                    <small class="text-danger">${flight.disruption_reason}</small>
+                                ` : ''}
+                            </div>
+                            <div class="col-md-3">
+                                ${flight.is_disrupted ? `
+                                    <button class="btn btn-sm btn-primary" onclick="viewFlightDetails('${flight.flight_id}')">
+                                        View Details
+                                    </button>
+                                ` : `
+                                    <span class="badge bg-success">On Time</span>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html || '<p class="text-muted">No flights found.</p>';
+        }
+
+        function updateFlightStats() {
+            const disrupted = allFlights.filter(f => f.is_disrupted).length;
+            const ontime = allFlights.length - disrupted;
+            
+            document.getElementById('stat-total-flights').textContent = allFlights.length;
+            document.getElementById('stat-disrupted').textContent = disrupted;
+            document.getElementById('stat-ontime').textContent = ontime;
+        }
+
+        function renderFlightDetailsModal(data) {
+            const flight = data.flight;
+            const disruption = data.disruption;
+            
+            const html = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5>✈️ Flight Information</h5>
+                        <table class="table table-sm">
+                            <tr><td><strong>Flight Number</strong></td><td>${flight.flight_number}</td></tr>
+                            <tr><td><strong>Route</strong></td><td>${flight.origin} → ${flight.destination}</td></tr>
+                            <tr><td><strong>Aircraft</strong></td><td>${flight.aircraft_type}</td></tr>
+                            <tr><td><strong>Gate/Terminal</strong></td><td>${flight.gate} / ${flight.terminal}</td></tr>
+                            <tr><td><strong>Scheduled Departure</strong></td><td>${formatDateTime(flight.scheduled_departure)}</td></tr>
+                            <tr><td><strong>Estimated Departure</strong></td><td>${formatDateTime(flight.estimated_departure)}</td></tr>
+                            <tr><td><strong>Scheduled Arrival</strong></td><td>${formatDateTime(flight.scheduled_arrival)}</td></tr>
+                            <tr><td><strong>Estimated Arrival</strong></td><td>${formatDateTime(flight.estimated_arrival)}</td></tr>
+                            <tr><td><strong>Status</strong></td><td>
+                                <span class="badge ${flight.status === 'On Time' ? 'bg-success' : 'bg-danger'}">
+                                    ${flight.status}
+                                </span>
+                            </td></tr>
+                        </table>
+                        
+                        ${disruption ? `
+                            <h5 class="mt-4">⚠️ Disruption Details</h5>
+                            <table class="table table-sm">
+                                <tr><td><strong>Reason</strong></td><td>${disruption.disruption_reason || 'N/A'}</td></tr>
+                                <tr><td><strong>Delay (minutes)</strong></td><td>${disruption.delay_minutes || 0}</td></tr>
+                                <tr><td><strong>Passengers Affected</strong></td><td>${data.passenger_count}</td></tr>
+                            </table>
+                        ` : `
+                            <div class="alert alert-success mt-4">No disruptions for this flight</div>
+                        `}
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-section">
+                            <h6>Summary</h6>
+                            <p><strong>Passengers:</strong> ${data.passenger_count}</p>
+                            <p><strong>Aircraft Type:</strong> ${flight.aircraft_type}</p>
+                            <p><strong>Terminal:</strong> ${flight.terminal}</p>
+                            ${disruption ? `
+                                <button class="btn btn-primary w-100 mt-3" id="generate-suggestions-btn" onclick="generateAndDisplayRecommendations()">
+                                    🤖 Generate AI Suggestions
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('flight-details-container').innerHTML = html;
+        }
+
+        function renderPassengersList(passengers) {
+            const container = document.getElementById('passengers-list');
+            
+            if (!passengers || passengers.length === 0) {
+                container.innerHTML = '<p class="text-muted">No passengers found.</p>';
+                return;
+            }
+            
+            // Store all passengers for message composer lookup
+            allPassengers = passengers;
+            
+            // Group passengers by flight number
+            const groupedByFlight = {};
+            passengers.forEach(p => {
+                const flightNum = p.flight_number || 'Unknown';
+                if (!groupedByFlight[flightNum]) {
+                    groupedByFlight[flightNum] = [];
+                }
+                groupedByFlight[flightNum].push(p);
+            });
+            
+            let html = '';
+            for (const [flightNum, flightPassengers] of Object.entries(groupedByFlight)) {
+                html += `
+                    <div class="detail-section mb-3" data-flight-section="${flightNum}">
+                        <h6 class="mb-3">✈️ ${flightNum} (${flightPassengers.length} passengers)</h6>
+                        <div class="mb-3">
+                            <button class="btn btn-sm btn-outline-primary" onclick="sendCommunication('${flightNum}', ${flightPassengers.length})">
+                                📢 Send Communication to All
+                            </button>
+                        </div>
+                `;
+                
+                flightPassengers.forEach(p => {
+                    const nextDest = p.next_segment_arrival_iataCode || '';
+                    const hasConnection = nextDest && nextDest !== 'null' && nextDest !== '';
+                    
+                    html += `
+                        <div class="passenger-row">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <div><strong>${p.passenger_name || p.full_name}</strong></div>
+                                    <small class="text-muted">PNR: ${p.pnr}</small>
+                                    ${hasConnection ? `<small class="text-info">Next: ${nextDest}</small><br>` : ''}
+                                    <div>
+                                        ${p.loyalty_tier && ['Gold', 'Platinum'].includes(p.loyalty_tier) ? `
+                                            <span class="badge vip-badge">${p.loyalty_tier}</span>
+                                        ` : ''}
+                                        ${p.special_service_request ? `
+                                            <span class="badge critical-badge">SSR: ${p.special_service_request}</span>
+                                        ` : ''}
+                                    </div>
+                                    ${(() => {
+                                        const pid = p.id || p.passenger_id;
+                                        if (passengerActions[pid] && passengerActions[pid].length > 0) {
+                                            return `
+                                                <div style="margin-top: 8px;">
+                                                    <small style="color: #155724; font-weight: bold;">✅ Actions Taken:</small><br>
+                                                    ${passengerActions[pid].map(action => `
+                                                        <span class="badge bg-success" style="font-size: 0.7rem; margin: 2px;">${action.icon}</span>
+                                                    `).join('')}
+                                                </div>
+                                            `;
+                                        }
+                                        return '';
+                                    })()}
+                                </div>
+                                <div class="col-md-3">
+                                    <small><strong>Class:</strong> ${p.fare_class_name || p.fare_class || 'Y'}</small><br>
+                                    <small><strong>Seat:</strong> ${p.seat_number || 'TBD'}</small><br>
+                                    <small><strong>Email:</strong> ${p.email || 'N/A'}</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-sm btn-primary btn-action" onclick='generatePassengerSuggestions("${p.id || p.passenger_id}")'>
+                                        🤖 AI Suggestion
+                                    </button>
+                                    <button class="btn btn-sm btn-success btn-action" onclick="showRebookOptions('${p.id || p.passenger_id}', '${flightNum}', '${nextDest}')">
+                                        🔄 Rebook
+                                    </button>
+                                    <button class="btn btn-sm btn-info btn-action" onclick="applyPlan('${p.id || p.passenger_id}', 'hotel')">
+                                        🏨 Hotel
+                                    </button>
+                                    <button class="btn btn-sm btn-warning btn-action" onclick="applyPlan('${p.id || p.passenger_id}', 'compensation')">
+                                        💰 Compensation
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary btn-action" onclick="sendPassengerComm('${p.id || p.passenger_id}')">
+                                        📧 Message
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+            }
+            
+            container.innerHTML = html || '<p class="text-muted">No passengers found.</p>';
+        }
+
+        function renderManagerSummary(summary) {
+            const container = document.getElementById('summary-cards');
+            
+            const cards = [
+                { label: 'Passengers Affected', value: summary.total_passengers_affected, icon: '👥' },
+                { label: 'Total Cost Impact', value: `$${summary.total_cost_impact.toLocaleString()}`, icon: '💰' },
+                { label: 'Hotel Rooms Needed', value: summary.hotel_rooms_needed, icon: '🏨' },
+                { label: 'Meal Vouchers', value: summary.meal_vouchers_issued, icon: '🍽️' },
+                { label: 'Passengers Reprotected', value: summary.passengers_reprotected, icon: '✅' },
+                { label: 'Cost per Passenger', value: `$${summary.average_cost_per_passenger.toFixed(2)}`, icon: '📊' }
+            ];
+            
+            const html = cards.map(card => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="summary-card">
+                        <div class="summary-value">${card.icon} ${card.value}</div>
+                        <div class="summary-label">${card.label}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+
+        function renderRecommendationsModal(rec) {
+            const html = `
+                <div>
+                    <h6>📋 Recommendations Summary</h6>
+                    <p><strong>Disruption ID:</strong> ${rec.disruption_id}</p>
+                    <p><strong>Flight:</strong> ${rec.flight_number}</p>
+                    <p><strong>Date:</strong> ${rec.flight_date}</p>
+                    
+                    ${rec.rebooking_options && rec.rebooking_options.length > 0 ? `
+                        <h6 class="mt-3">✈️ Rebooking Options</h6>
+                        ${rec.rebooking_options.map(opt => `
+                            <small>• Flight ${opt.flight_number} - Departs: ${formatDateTime(opt.new_departure_time)}</small><br>
+                        `).join('')}
+                    ` : ''}
+                    
+                    ${rec.vouchers && rec.vouchers.length > 0 ? `
+                        <h6 class="mt-3">🎟️ Vouchers</h6>
+                        ${rec.vouchers.slice(0, 3).map(v => `
+                            <small>• ${v.type}: $${v.amount}</small><br>
+                        `).join('')}
+                        ${rec.vouchers.length > 3 ? `<small>... and ${rec.vouchers.length - 3} more</small>` : ''}
+                    ` : ''}
+                    
+                    ${rec.compensation && rec.compensation.length > 0 ? `
+                        <h6 class="mt-3">💰 Compensation</h6>
+                        ${rec.compensation.slice(0, 3).map(c => `
+                            <small>• ${c.type}: $${c.amount} × ${c.passenger_count}</small><br>
+                        `).join('')}
+                    ` : ''}
+                    
+                    ${rec.source ? `<small class="text-muted mt-3">Source: ${rec.source}</small>` : ''}
+                </div>
+            `;
+            
+            document.getElementById('modal-recommendations').innerHTML = html;
+        }
+
+        function renderOllamaSuggestionsTab(rec) {
+            console.log('renderOllamaSuggestionsTab called with:', rec);
+            if (!rec) {
+                console.log('No rec provided');
+                document.getElementById('suggestions-container').innerHTML = '<div class="alert alert-warning">No recommendations available</div>';
+                return;
+            }
+
+            let html = `
+                <div class="ollama-suggestions-container">
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5>🤖 Ollama AI Recommendations</h5>
+                            <small class="text-muted">Flight: <strong>${rec.flight_number}</strong> | Priority: <strong>${rec.priority || 'NORMAL'}</strong></small>
+                        </div>
+                    </div>
+            `;
+
+            // Initial Communications
+            if (rec.initial_communications) {
+                html += `
+                    <div class="suggestion-section mb-4">
+                        <div class="section-header">
+                            <h6 class="mb-3">📢 Initial Communications</h6>
+                        </div>
+                        <div class="section-content">
+                `;
+                
+                if (rec.initial_communications.channels) {
+                    rec.initial_communications.channels.forEach(ch => {
+                        html += `
+                            <div class="communication-item mb-3 p-3" style="background: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
+                                <strong>${ch.type}</strong>
+                                <small class="text-muted d-block">Send within ${ch.eta_minutes} min</small>
+                                <p class="mb-0"><em>${ch.template.substring(0, 100)}...</em></p>
+                                <button class="btn btn-sm btn-primary mt-2" onclick="applySuggestionAction('communication', '${ch.type}', '${rec.flight_number}')">
+                                    ✅ Apply ${ch.type}
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += `</div></div>`;
+            }
+
+            // Rebooking Options
+            if (rec.rebooking_options && rec.rebooking_options.length > 0) {
+                html += `
+                    <div class="suggestion-section mb-4">
+                        <div class="section-header">
+                            <h6 class="mb-3">✈️ Rebooking Options</h6>
+                        </div>
+                        <div class="section-content">
+                `;
+                
+                rec.rebooking_options.forEach((opt, idx) => {
+                    html += `
+                        <div class="rebooking-item mb-3 p-3" style="background: #e7f5ff; border-left: 4px solid #1971c2; border-radius: 4px;">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <strong>Option ${idx + 1}: Flight ${opt.flight_number}</strong><br>
+                                    <small class="text-muted">Departure: ${formatDateTime(opt.departure)}</small><br>
+                                    <strong class="text-success">${opt.seats_available} Seats Available</strong>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-success" onclick="applySuggestionAction('rebooking', '${opt.flight_number}', '${rec.flight_number}')">
+                                        ✅ Approve Rebook
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            }
+
+            // Vouchers
+            if (rec.vouchers && rec.vouchers.length > 0) {
+                html += `
+                    <div class="suggestion-section mb-4">
+                        <div class="section-header">
+                            <h6 class="mb-3">🎟️ Vouchers</h6>
+                        </div>
+                        <div class="section-content">
+                `;
+                
+                rec.vouchers.forEach(v => {
+                    const total = v.amount * v.quantity;
+                    html += `
+                        <div class="voucher-item mb-3 p-3" style="background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <strong>${v.type.charAt(0).toUpperCase() + v.type.slice(1)} Vouchers</strong><br>
+                                    <small class="text-muted">$${v.amount} per person × ${v.quantity} passengers = <strong>$${total.toLocaleString()}</strong></small>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-warning" onclick="applySuggestionAction('voucher', '${v.type}', '${rec.flight_number}')">
+                                        ✅ Issue Vouchers
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            }
+
+            // Compensation
+            if (rec.compensation && rec.compensation.length > 0) {
+                html += `
+                    <div class="suggestion-section mb-4">
+                        <div class="section-header">
+                            <h6 class="mb-3">💰 Compensation</h6>
+                        </div>
+                        <div class="section-content">
+                `;
+                
+                rec.compensation.forEach(comp => {
+                    const total = comp.amount * comp.eligible_passengers;
+                    html += `
+                        <div class="compensation-item mb-3 p-3" style="background: #d3e5d3; border-left: 4px solid #28a745; border-radius: 4px;">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <strong>${comp.type.replace(/_/g, ' ')}</strong><br>
+                                    <small class="text-muted">€${comp.amount} per passenger × ${comp.eligible_passengers} eligible</small><br>
+                                    <strong class="text-success">Total: €${total.toLocaleString()}</strong>
+                                    <br><small class="text-muted">${comp.conditions}</small>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-success" onclick="applySuggestionAction('compensation', '${comp.type}', '${rec.flight_number}')">
+                                        ✅ Approve Payment
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            }
+
+            // Operational Actions
+            if (rec.operational_actions && rec.operational_actions.length > 0) {
+                html += `
+                    <div class="suggestion-section mb-4">
+                        <div class="section-header">
+                            <h6 class="mb-3">🔧 Operational Actions</h6>
+                        </div>
+                        <div class="section-content">
+                `;
+                
+                rec.operational_actions.forEach((action, idx) => {
+                    const actionText = action.substring(0, 20).replace(/'/g, ' ');
+                    html += `
+                        <div class="action-item mb-2 p-3" style="background: #f0f0f0; border-left: 4px solid #6c757d; border-radius: 4px;">
+                            <div class="row align-items-center">
+                                <div class="col-md-10">
+                                    <strong>• ${action}</strong>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <button class="btn btn-sm btn-secondary" onclick="applySuggestionAction('operation', 'action_${idx}', '${rec.flight_number}')">
+                                        ✅ Assign
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            }
+
+            // Cost Optimization
+            if (rec.cost_optimization && rec.cost_optimization.length > 0) {
+                html += `
+                    <div class="suggestion-section mb-4">
+                        <div class="section-header">
+                            <h6 class="mb-3">💡 Cost Optimization</h6>
+                        </div>
+                        <div class="section-content">
+                `;
+                
+                rec.cost_optimization.forEach(opt => {
+                    html += `
+                        <div class="optimization-item mb-3 p-3" style="background: #e3f2fd; border-left: 4px solid #1976d2; border-radius: 4px;">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <strong>${opt.measure}</strong><br>
+                                    <strong class="text-info">💰 Potential Saving: $${opt.estimated_saving.toLocaleString()}</strong>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-info" onclick="applySuggestionAction('optimization', '${opt.measure.substring(0, 20)}', '${rec.flight_number}')">
+                                        ✅ Implement
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            }
+
+            html += `</div>`;
+            console.log('renderOllamaSuggestionsTab: Setting innerHTML');
+            document.getElementById('suggestions-container').innerHTML = html;
+            console.log('renderOllamaSuggestionsTab: Rendered successfully');
+        }
+
+        function applySuggestionAction(type, action, flight) {
+            showAlert(`✅ Applied: ${type} - ${action} for flight ${flight}`, 'success');
+            // Track the action
+            trackAction({
+                type: type,
+                action: action,
+                flight: flight,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        // ========================
+        // Event Handlers
+        // ========================
+        function viewFlightDetails(flightId) {
+            fetchFlightDetails(flightId);
+            // Switch to details tab
+            document.querySelector('[data-tab="details"]').click();
+        }
+
+        function applyPassengerFilters() {
+            if (!currentFlight) {
+                showAlert('Please select a flight first', 'warning');
+                return;
+            }
+            fetchPassengers(currentFlight.flight.flight_id);
+        }
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.style.display = 'none';
+                });
+                
+                // Remove active class
+                document.querySelectorAll('.nav-link').forEach(l => {
+                    l.classList.remove('active');
+                });
+                
+                // Show selected tab
+                const tab = this.getAttribute('data-tab');
+                document.getElementById(`${tab}-tab`).style.display = 'block';
+                this.classList.add('active');
+                
+                // Load data
+                if (tab === 'flights') {
+                    fetchFlights();
+                } else if (tab === 'passengers') {
+                    if (currentFlight) fetchPassengers(currentFlight.flight.flight_id);
+                } else if (tab === 'summary') {
+                    fetchManagerSummary();
+                } else if (tab === 'mass-meals') {
+                    loadFlightsForMassMeal();
+                } else if (tab === 'mass-rebooking') {
+                    loadFlightsForMassRebooking();
+                }
+            });
+        });
+
+        // ========================
+        // Mass Meal Issuance Functions
+        // ========================
+        let massMealPassengers = [];
+        let selectedMealPassengers = new Set();
+
+        async function loadFlightsForMassMeal() {
+            const select = document.getElementById('mass-meal-flight-select');
+            select.innerHTML = '<option value="">-- Loading flights... --</option>';
+            
+            // Fetch flights if not already loaded
+            if (!allFlights || allFlights.length === 0) {
+                try {
+                    const response = await fetch(`${API_BASE}/flights`);
+                    const data = await response.json();
+                    allFlights = data.flights;
+                } catch (e) {
+                    showAlert('Error loading flights: ' + e.message, 'danger');
+                    select.innerHTML = '<option value="">-- Error loading flights --</option>';
+                    return;
+                }
+            }
+            
+            select.innerHTML = '<option value="">-- Select a Flight --</option>';
+            allFlights.forEach(flight => {
+                if (flight.is_disrupted) {
+                    const departureTime = flight.scheduled_departure ? new Date(flight.scheduled_departure).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
+                    select.innerHTML += `<option value="${flight.flight_id}">${flight.flight_number} - ${flight.origin} → ${flight.destination} (${departureTime})</option>`;
+                }
+            });
+            
+            if (select.options.length === 1) {
+                select.innerHTML = '<option value="">-- No disrupted flights found --</option>';
+            }
+        }
+
+        async function loadPassengersForMassMeal() {
+            const flightId = document.getElementById('mass-meal-flight-select').value;
+            if (!flightId) {
+                document.getElementById('mass-meal-passengers-container').innerHTML = '<p class="text-muted">Select a flight to view passengers</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/flights/${flightId}/passengers`);
+                const data = await response.json();
+                massMealPassengers = data.passengers;
+                selectedMealPassengers.clear();
+                renderMassMealPassengers();
+            } catch (e) {
+                showAlert('Error loading passengers: ' + e.message, 'danger');
+            }
+        }
+
+        function renderMassMealPassengers() {
+            const container = document.getElementById('mass-meal-passengers-container');
+            
+            if (massMealPassengers.length === 0) {
+                container.innerHTML = '<p class="text-muted">No passengers found</p>';
+                return;
+            }
+
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="50">
+                                    <input type="checkbox" id="select-all-meals" onchange="toggleAllMeals(this.checked)">
+                                </th>
+                                <th>Passenger Name</th>
+                                <th>PNR</th>
+                                <th>Class</th>
+                                <th>Loyalty Tier</th>
+                                <th>SSR</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            massMealPassengers.forEach(p => {
+                const pid = p.id || p.passenger_id;
+                const isSelected = selectedMealPassengers.has(pid);
+                const alreadyIssued = passengerActions[pid]?.some(a => a.type === 'meal');
+                
+                html += `
+                    <tr class="${alreadyIssued ? 'table-success' : ''}" style="${alreadyIssued ? 'opacity: 0.6;' : ''}">
+                        <td>
+                            <input type="checkbox" 
+                                   class="meal-passenger-checkbox" 
+                                   value="${pid}"
+                                   ${isSelected ? 'checked' : ''}
+                                   ${alreadyIssued ? 'disabled' : ''}
+                                   onchange="toggleMealPassenger('${pid}', this.checked)">
+                        </td>
+                        <td>
+                            <strong>${p.full_name || p.passenger_name}</strong>
+                            ${alreadyIssued ? '<span class="badge bg-success ms-2">🍽️ Already Issued</span>' : ''}
+                        </td>
+                        <td>${p.pnr}</td>
+                        <td>${p.fare_class_name || p.fare_class || 'Y'}</td>
+                        <td>${p.loyalty_tier ? `<span class="badge bg-warning">${p.loyalty_tier}</span>` : '-'}</td>
+                        <td>${p.special_service_request ? `<span class="badge bg-danger">${p.special_service_request}</span>` : '-'}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            updateMealSelectedCount();
+        }
+
+        function toggleMealPassenger(passengerId, checked) {
+            if (checked) {
+                selectedMealPassengers.add(passengerId);
+            } else {
+                selectedMealPassengers.delete(passengerId);
+            }
+            updateMealSelectedCount();
+        }
+
+        function toggleAllMeals(checked) {
+            massMealPassengers.forEach(p => {
+                const pid = p.id || p.passenger_id;
+                const alreadyIssued = passengerActions[pid]?.some(a => a.type === 'meal');
+                if (!alreadyIssued) {
+                    if (checked) {
+                        selectedMealPassengers.add(pid);
+                    } else {
+                        selectedMealPassengers.delete(pid);
+                    }
+                }
+            });
+            renderMassMealPassengers();
+        }
+
+        function selectAllMealPassengers() {
+            document.getElementById('select-all-meals').checked = true;
+            toggleAllMeals(true);
+        }
+
+        function deselectAllMealPassengers() {
+            document.getElementById('select-all-meals').checked = false;
+            toggleAllMeals(false);
+        }
+
+        function updateMealSelectedCount() {
+            const countElement = document.getElementById('meal-selected-count');
+            if (countElement) {
+                countElement.textContent = selectedMealPassengers.size;
+            }
+            const btn = document.getElementById('issue-mass-meals-btn');
+            if (btn) {
+                btn.disabled = selectedMealPassengers.size === 0;
+            }
+        }
+
+        async function issueMassMeals() {
+            if (selectedMealPassengers.size === 0) {
+                showAlert('Please select at least one passenger', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('issue-mass-meals-btn');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Issuing...';
+
+            try {
+                const response = await fetch(`${API_BASE}/actions/mass-meal-coupons`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        passenger_ids: Array.from(selectedMealPassengers),
+                        amount: 25,
+                        quantity: 1
+                    })
+                });
+
+                const result = await response.json();
+                
+                // Track actions for each passenger
+                selectedMealPassengers.forEach(pid => {
+                    trackCompletedAction(pid, 'meal', 'Meal Voucher $25');
+                });
+
+                showAlert(`✅ Successfully issued meal vouchers to ${selectedMealPassengers.size} passengers!`, 'success');
+                selectedMealPassengers.clear();
+                renderMassMealPassengers();
+                
+                // Update button text with new count after rendering completes
+                setTimeout(() => {
+                    const btn = document.getElementById('issue-mass-meals-btn');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = '🍽️ Issue Meal Vouchers (<span id="meal-selected-count">0</span> selected)';
+                    }
+                }, 100);
+            } catch (e) {
+                showAlert('Error issuing meal vouchers: ' + e.message, 'danger');
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        // ========================
+        // Mass Rebooking Functions
+        // ========================
+        let massRebookingPassengers = [];
+        let selectedRebookingPassengers = new Set();
+        let alternativeFlights = [];
+
+        async function loadFlightsForMassRebooking() {
+            const select = document.getElementById('mass-rebooking-flight-select');
+            select.innerHTML = '<option value="">-- Loading flights... --</option>';
+            
+            // Fetch flights if not already loaded
+            if (!allFlights || allFlights.length === 0) {
+                try {
+                    const response = await fetch(`${API_BASE}/flights`);
+                    const data = await response.json();
+                    allFlights = data.flights;
+                } catch (e) {
+                    showAlert('Error loading flights: ' + e.message, 'danger');
+                    select.innerHTML = '<option value="">-- Error loading flights --</option>';
+                    return;
+                }
+            }
+            
+            select.innerHTML = '<option value="">-- Select a Flight --</option>';
+            allFlights.forEach(flight => {
+                if (flight.is_disrupted) {
+                    const departureTime = flight.scheduled_departure ? new Date(flight.scheduled_departure).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
+                    select.innerHTML += `<option value="${flight.flight_id}">${flight.flight_number} - ${flight.origin} → ${flight.destination} (${departureTime})</option>`;
+                }
+            });
+            
+            if (select.options.length === 1) {
+                select.innerHTML = '<option value="">-- No disrupted flights found --</option>';
+            }
+        }
+
+        async function loadPassengersForMassRebooking() {
+            const flightId = document.getElementById('mass-rebooking-flight-select').value;
+            if (!flightId) {
+                document.getElementById('mass-rebooking-passengers-container').innerHTML = '<p class="text-muted">Select a flight to view passengers</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/flights/${flightId}/passengers`);
+                const data = await response.json();
+                massRebookingPassengers = data.passengers;
+                selectedRebookingPassengers.clear();
+                renderMassRebookingPassengers();
+                
+                // Load alternative flights for this route
+                const selectedFlight = allFlights.find(f => f.flight_id === flightId);
+                if (selectedFlight) {
+                    loadAlternativeFlights(selectedFlight.destination);
+                }
+            } catch (e) {
+                showAlert('Error loading passengers: ' + e.message, 'danger');
+            }
+        }
+
+        async function loadAlternativeFlights(destination) {
+            const select = document.getElementById('mass-rebooking-alternative-select');
+            select.innerHTML = '<option value="">-- Select Alternative Flight --</option>';
+            
+            // Filter flights going to the same destination that are not disrupted
+            alternativeFlights = allFlights.filter(f => 
+                f.destination === destination && 
+                !f.is_disrupted &&
+                f.flight_id !== document.getElementById('mass-rebooking-flight-select').value
+            );
+
+            alternativeFlights.forEach(flight => {
+                const availableSeats = 180; // Mock available seats
+                const departureTime = flight.scheduled_departure ? new Date(flight.scheduled_departure).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
+                select.innerHTML += `
+                    <option value="${flight.flight_id}">
+                        ${flight.flight_number} - ${departureTime} (${availableSeats} seats available)
+                    </option>
+                `;
+            });
+
+            select.disabled = false;
+        }
+
+        function renderMassRebookingPassengers() {
+            const container = document.getElementById('mass-rebooking-passengers-container');
+            
+            if (massRebookingPassengers.length === 0) {
+                container.innerHTML = '<p class="text-muted">No passengers found</p>';
+                return;
+            }
+
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="50">
+                                    <input type="checkbox" id="select-all-rebooking" onchange="toggleAllRebooking(this.checked)">
+                                </th>
+                                <th>Passenger Name</th>
+                                <th>PNR</th>
+                                <th>Class</th>
+                                <th>Seat</th>
+                                <th>Connection</th>
+                                <th>Loyalty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            massRebookingPassengers.forEach(p => {
+                const pid = p.id || p.passenger_id;
+                const isSelected = selectedRebookingPassengers.has(pid);
+                const alreadyRebooked = passengerActions[pid]?.some(a => a.type === 'rebooking');
+                
+                html += `
+                    <tr class="${alreadyRebooked ? 'table-success' : ''}" style="${alreadyRebooked ? 'opacity: 0.6;' : ''}">
+                        <td>
+                            <input type="checkbox" 
+                                   class="rebooking-passenger-checkbox" 
+                                   value="${pid}"
+                                   ${isSelected ? 'checked' : ''}
+                                   ${alreadyRebooked ? 'disabled' : ''}
+                                   onchange="toggleRebookingPassenger('${pid}', this.checked)">
+                        </td>
+                        <td>
+                            <strong>${p.full_name || p.passenger_name}</strong>
+                            ${alreadyRebooked ? '<span class="badge bg-success ms-2">✈️ Already Rebooked</span>' : ''}
+                        </td>
+                        <td>${p.pnr}</td>
+                        <td>${p.fare_class_name || p.fare_class || 'Y'}</td>
+                        <td>${p.seat_number || 'TBD'}</td>
+                        <td>${p.connecting_flight ? `<span class="badge bg-info">${p.connecting_flight}</span>` : '-'}</td>
+                        <td>${p.loyalty_tier ? `<span class="badge bg-warning">${p.loyalty_tier}</span>` : '-'}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            updateRebookingSelectedCount();
+        }
+
+        function toggleRebookingPassenger(passengerId, checked) {
+            if (checked) {
+                selectedRebookingPassengers.add(passengerId);
+            } else {
+                selectedRebookingPassengers.delete(passengerId);
+            }
+            updateRebookingSelectedCount();
+        }
+
+        function toggleAllRebooking(checked) {
+            massRebookingPassengers.forEach(p => {
+                const pid = p.id || p.passenger_id;
+                const alreadyRebooked = passengerActions[pid]?.some(a => a.type === 'rebooking');
+                if (!alreadyRebooked) {
+                    if (checked) {
+                        selectedRebookingPassengers.add(pid);
+                    } else {
+                        selectedRebookingPassengers.delete(pid);
+                    }
+                }
+            });
+            renderMassRebookingPassengers();
+        }
+
+        function selectAllRebookingPassengers() {
+            document.getElementById('select-all-rebooking').checked = true;
+            toggleAllRebooking(true);
+        }
+
+        function deselectAllRebookingPassengers() {
+            document.getElementById('select-all-rebooking').checked = false;
+            toggleAllRebooking(false);
+        }
+
+        function updateRebookingSelectedCount() {
+            const countElement = document.getElementById('rebooking-selected-count');
+            if (countElement) {
+                countElement.textContent = selectedRebookingPassengers.size;
+            }
+            const btn = document.getElementById('process-mass-rebooking-btn');
+            if (btn) {
+                btn.disabled = selectedRebookingPassengers.size === 0;
+            }
+        }
+
+        async function processMassRebooking() {
+            if (selectedRebookingPassengers.size === 0) {
+                showAlert('Please select at least one passenger', 'warning');
+                return;
+            }
+
+            const alternativeFlightId = document.getElementById('mass-rebooking-alternative-select').value;
+            if (!alternativeFlightId) {
+                showAlert('Please select an alternative flight', 'warning');
+                return;
+            }
+
+            const alternativeFlight = allFlights.find(f => f.flight_id === alternativeFlightId);
+            if (!alternativeFlight) {
+                showAlert('Alternative flight not found', 'danger');
+                return;
+            }
+
+            const btn = document.getElementById('process-mass-rebooking-btn');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Rebooking...';
+
+            try {
+                const response = await fetch(`${API_BASE}/actions/mass-rebookings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        passenger_ids: Array.from(selectedRebookingPassengers),
+                        new_flight_number: alternativeFlight.flight_number,
+                        new_departure_time: alternativeFlight.departure_time
+                    })
+                });
+
+                const result = await response.json();
+                
+                // Track actions for each passenger
+                selectedRebookingPassengers.forEach(pid => {
+                    trackCompletedAction(pid, 'rebooking', `Rebooked to ${alternativeFlight.flight_number}`);
+                });
+
+                showAlert(`✅ Successfully rebooked ${selectedRebookingPassengers.size} passengers to ${alternativeFlight.flight_number}!`, 'success');
+                selectedRebookingPassengers.clear();
+                renderMassRebookingPassengers();
+                
+                // Update button text with new count
+                setTimeout(() => {
+                    const btn = document.getElementById('process-mass-rebooking-btn');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = '✈️ Rebook (<span id="rebooking-selected-count">0</span>)';
+                    }
+                }, 100);
+            } catch (e) {
+                showAlert('Error processing rebookings: ' + e.message, 'danger');
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        // ========================
+        // Initialization
+        // ========================
+        window.addEventListener('DOMContentLoaded', function() {
+            fetchFlights();
+            fetchDisruptions();
+            fetchManagerSummary();
+            updateRefreshTime();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "d38b38ed-21de-4e98-95ae-9e80b85dbc50",
+    "action_id": "HV_2EA53F95",
+    "passenger_id": "test-passenger-1",
+    "passenger_name": "John Smith",
+    "pnr": "ABC123",
+    "email": "john@example.com",
+    "flight_number": "EY129",
+    "hotel_amount": 150,
+    "quantity": 1,
+    "total_value": 150,
+    "hotel_category": "Premium",
+    "check_in_date": "2025-11-28",
+    "nights": 1,
+    "notes": "Test hotel voucher",
+    "issued_by": "System",
+    "issued_date": "2025-11-27T17:46:23.516302",
+    "status": "Issued",
+    "validity_days": 90
+  }
+]
